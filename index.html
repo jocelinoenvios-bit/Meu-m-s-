@@ -172,6 +172,54 @@
   nav button .ic{ font-size:18px; }
   nav button.ativo{ color:var(--teal); font-weight:600; }
   .hidden{ display:none; }
+  .item-acoes{ display:flex; gap:10px; margin-left:10px; }
+  .item-acoes button{
+    background:none;
+    border:none;
+    font-size:15px;
+    padding:4px;
+    color:var(--ink-soft);
+  }
+  .item-linha{ display:flex; justify-content:space-between; align-items:center; }
+  .cat-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .cat-row:last-child{ border-bottom:none; }
+  .cat-nome{ font-size:14px; font-weight:500; }
+  .cat-tipo-tag{ font-size:11px; color:var(--ink-soft); }
+  .cat-acoes button{
+    background:none; border:none; font-size:14px; padding:4px 6px; color:var(--ink-soft);
+  }
+  .form-cat{ display:flex; gap:8px; margin-top:12px; }
+  .form-cat input{ flex:2; }
+  .form-cat select{ flex:1; }
+  .form-cat button{
+    background:var(--teal-light); color:#fff; border:none; border-radius:10px; padding:0 14px; font-weight:600;
+  }
+  .btn-perigo{
+    background:#FBEAE7;
+    color:var(--coral);
+    border:1px solid #F3C9C2;
+    padding:12px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:14px;
+    width:100%;
+    margin-top:8px;
+  }
+  .btn-cancelar{
+    background:none;
+    border:1px solid var(--border);
+    color:var(--ink-soft);
+    padding:12px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:14px;
+  }
 </style>
 </head>
 <body>
@@ -248,7 +296,8 @@
           </select>
         </div>
 
-        <button type="submit" class="btn-salvar">Salvar lançamento</button>
+        <button type="submit" class="btn-salvar" id="btn-salvar-transacao">Salvar lançamento</button>
+        <button type="button" class="btn-cancelar hidden" id="btn-cancelar-edicao">Cancelar edição</button>
       </form>
     </div>
   </section>
@@ -269,6 +318,27 @@
     </div>
   </section>
 
+  <!-- TELA 5: CONFIGURAÇÕES -->
+  <section id="tela-config" class="hidden">
+    <div class="section-title">Categorias</div>
+    <div class="card">
+      <div id="lista-categorias"></div>
+      <div class="form-cat">
+        <input type="text" id="cfg-cat-nome" placeholder="Nova categoria">
+        <select id="cfg-cat-tipo">
+          <option value="entrada">Entrada</option>
+          <option value="saida">Saída</option>
+        </select>
+        <button type="button" id="btn-add-categoria">+</button>
+      </div>
+    </div>
+
+    <div class="section-title">Dados</div>
+    <div class="card">
+      <button type="button" class="btn-perigo" id="btn-apagar-tudo">Apagar todos os dados</button>
+    </div>
+  </section>
+
 </main>
 
 <nav>
@@ -276,6 +346,7 @@
   <button data-tela="nova"><span class="ic">➕</span>Novo</button>
   <button data-tela="contas"><span class="ic">⏰</span>Contas</button>
   <button data-tela="historico"><span class="ic">📋</span>Histórico</button>
+  <button data-tela="config"><span class="ic">⚙️</span>Config</button>
 </nav>
 
 <script>
@@ -311,7 +382,7 @@ let estado = carregarDados();
 let tipoSelecionado = "entrada";
 
 /* ---------- 2. NAVEGAÇÃO ENTRE TELAS ---------- */
-const telas = ["dashboard","nova","contas","historico"];
+const telas = ["dashboard","nova","contas","historico","config"];
 document.querySelectorAll("nav button").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     const alvo = btn.dataset.tela;
@@ -320,15 +391,54 @@ document.querySelectorAll("nav button").forEach(btn=>{
     });
     document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ativo"));
     btn.classList.add("ativo");
+    // Se o usuário sair da tela "nova" sem salvar, cancela qualquer edição pendente
+    if(alvo!=="nova") cancelarEdicao();
     if(alvo==="nova") prepararFormulario();
     renderizarTudo();
   });
 });
 
-/* ---------- 3. FORMULÁRIO DE NOVA TRANSAÇÃO ---------- */
+/* ---------- 3. FORMULÁRIO DE NOVA TRANSAÇÃO (e edição) ---------- */
+let editandoId = null; // null = criando nova; senão, guarda o id da transação em edição
+
 function prepararFormulario(){
   document.getElementById("f-data").valueAsDate = new Date();
   selecionarTipo("entrada");
+}
+
+function cancelarEdicao(){
+  editandoId = null;
+  document.getElementById("btn-salvar-transacao").textContent = "Salvar lançamento";
+  document.getElementById("btn-cancelar-edicao").classList.add("hidden");
+  document.getElementById("form-transacao").reset();
+}
+document.getElementById("btn-cancelar-edicao").addEventListener("click", ()=>{
+  cancelarEdicao();
+  prepararFormulario();
+});
+
+// Preenche o formulário com os dados de uma transação existente e entra em modo edição
+function editarTransacao(id){
+  const t = estado.transacoes.find(t=>t.id===id);
+  if(!t) return;
+  editandoId = id;
+  selecionarTipo(t.tipo);
+  document.getElementById("f-descricao").value = t.descricao;
+  document.getElementById("f-valor").value = t.valor;
+  document.getElementById("f-categoria").value = t.categoria;
+  document.getElementById("f-data").value = t.data;
+  if(t.tipo==="saida") document.getElementById("f-status").value = t.status;
+  document.getElementById("btn-salvar-transacao").textContent = "Salvar alterações";
+  document.getElementById("btn-cancelar-edicao").classList.remove("hidden");
+  document.querySelector('nav button[data-tela="nova"]').click();
+}
+
+function apagarTransacao(id){
+  if(!confirm("Apagar este lançamento? Essa ação não pode ser desfeita.")) return;
+  estado.transacoes = estado.transacoes.filter(t=>t.id!==id);
+  salvarDados();
+  if(editandoId===id) cancelarEdicao();
+  renderizarTudo();
 }
 
 function selecionarTipo(tipo){
@@ -351,8 +461,7 @@ document.getElementById("btn-tipo-saida").addEventListener("click", ()=>selecion
 
 document.getElementById("form-transacao").addEventListener("submit", (e)=>{
   e.preventDefault(); // impede recarregar a página
-  const nova = {
-    id: "t"+Date.now(),
+  const dados = {
     tipo: tipoSelecionado,
     descricao: document.getElementById("f-descricao").value,
     valor: parseFloat(document.getElementById("f-valor").value),
@@ -360,9 +469,18 @@ document.getElementById("form-transacao").addEventListener("submit", (e)=>{
     data: document.getElementById("f-data").value,
     status: tipoSelecionado==="entrada" ? "pago" : document.getElementById("f-status").value
   };
-  estado.transacoes.push(nova);
+
+  if(editandoId){
+    // Modo edição: encontra a transação existente e substitui os campos, mantendo o id
+    const idx = estado.transacoes.findIndex(t=>t.id===editandoId);
+    if(idx > -1) estado.transacoes[idx] = { id: editandoId, ...dados };
+  } else {
+    // Modo criação: adiciona uma transação nova
+    estado.transacoes.push({ id: "t"+Date.now(), ...dados });
+  }
+
   salvarDados();
-  e.target.reset();
+  cancelarEdicao();
   prepararFormulario();
   // Volta pro dashboard depois de salvar
   document.querySelector('nav button[data-tela="dashboard"]').click();
@@ -440,7 +558,13 @@ function itemHTML(t){
         <div class="item-desc">${t.descricao} ${badge}</div>
         <div class="item-cat">${nomeCategoria(t.categoria)} · ${dataFmt}</div>
       </div>
-      <div class="item-valor" style="color:${cor}">${sinal} ${formatarMoeda(t.valor)}</div>
+      <div class="item-linha">
+        <div class="item-valor" style="color:${cor}">${sinal} ${formatarMoeda(t.valor)}</div>
+        <div class="item-acoes">
+          <button type="button" onclick="editarTransacao('${t.id}')" title="Editar">✏️</button>
+          <button type="button" onclick="apagarTransacao('${t.id}')" title="Apagar">🗑️</button>
+        </div>
+      </div>
     </div>`;
 }
 
@@ -448,7 +572,71 @@ function renderizarTudo(){
   renderizarDashboard();
   renderizarContas();
   renderizarHistorico();
+  renderizarConfig();
 }
+
+/* ---------- 5b. CONFIGURAÇÕES: categorias e apagar dados ---------- */
+function renderizarConfig(){
+  const el = document.getElementById("lista-categorias");
+  if(!estado.categorias.length){
+    el.innerHTML = '<div class="empty">Nenhuma categoria cadastrada</div>';
+    return;
+  }
+  el.innerHTML = estado.categorias.map(c => `
+    <div class="cat-row">
+      <div>
+        <div class="cat-nome">${c.nome}</div>
+        <div class="cat-tipo-tag">${c.tipo === "entrada" ? "Entrada" : "Saída"}</div>
+      </div>
+      <div class="cat-acoes">
+        <button type="button" onclick="editarCategoria('${c.id}')" title="Editar">✏️</button>
+        <button type="button" onclick="apagarCategoria('${c.id}')" title="Apagar">🗑️</button>
+      </div>
+    </div>`).join("");
+}
+
+document.getElementById("btn-add-categoria").addEventListener("click", ()=>{
+  const nomeEl = document.getElementById("cfg-cat-nome");
+  const nome = nomeEl.value.trim();
+  const tipo = document.getElementById("cfg-cat-tipo").value;
+  if(!nome) return;
+  estado.categorias.push({ id: "c"+Date.now(), nome, tipo });
+  salvarDados();
+  nomeEl.value = "";
+  renderizarConfig();
+});
+
+// Edita o nome de uma categoria (o tipo não muda, pra não bagunçar lançamentos já feitos)
+function editarCategoria(id){
+  const c = estado.categorias.find(c=>c.id===id);
+  if(!c) return;
+  const novoNome = prompt("Novo nome da categoria:", c.nome);
+  if(novoNome === null || !novoNome.trim()) return;
+  c.nome = novoNome.trim();
+  salvarDados();
+  renderizarConfig();
+}
+
+// Apaga uma categoria. Lançamentos que já usam ela continuam existindo,
+// só deixam de aparecer na lista de opções do formulário.
+function apagarCategoria(id){
+  const emUso = estado.transacoes.some(t=>t.categoria===id);
+  const aviso = emUso
+    ? "Essa categoria já está sendo usada em lançamentos. Apagar mesmo assim?"
+    : "Apagar esta categoria?";
+  if(!confirm(aviso)) return;
+  estado.categorias = estado.categorias.filter(c=>c.id!==id);
+  salvarDados();
+  renderizarConfig();
+}
+
+document.getElementById("btn-apagar-tudo").addEventListener("click", ()=>{
+  if(!confirm("Isso vai apagar TODOS os lançamentos e categorias. Não tem como desfazer. Confirma?")) return;
+  localStorage.removeItem(DB_KEY);
+  estado = carregarDados();
+  cancelarEdicao();
+  renderizarTudo();
+});
 
 /* ---------- 6. PWA: registrar service worker ---------- */
 if('serviceWorker' in navigator){
