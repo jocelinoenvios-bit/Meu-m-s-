@@ -17,7 +17,19 @@
     --teal:#12332B;
     --teal-light:#1C6758;
     --coral:#C44536;
+    --amber:#B8842E;
     --border:#DCE5DE;
+  }
+  html[data-tema="escuro"]{
+    --bg:#101512;
+    --card:#1A2320;
+    --ink:#EAF1EC;
+    --ink-soft:#8FA69A;
+    --teal:#2E8067;
+    --teal-light:#42A585;
+    --coral:#E2685A;
+    --amber:#E0A94C;
+    --border:#2B3733;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
@@ -26,6 +38,7 @@
     color:var(--ink);
     padding-bottom:84px;
     -webkit-tap-highlight-color:transparent;
+    transition:background .2s, color .2s;
   }
   header{
     background:var(--teal);
@@ -82,6 +95,9 @@
     font-weight:600;
     font-size:16px;
     margin:18px 0 10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
   }
   .item{
     display:flex;
@@ -89,14 +105,19 @@
     align-items:center;
     padding:12px 0;
     border-bottom:1px solid var(--border);
+    gap:8px;
   }
   .item:last-child{ border-bottom:none; }
   .item-desc{ font-weight:500; font-size:14px; }
-  .item-cat{ font-size:12px; color:var(--ink-soft); }
+  .item-cat{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .item-venc{ font-size:11px; font-weight:600; margin-top:2px; }
+  .item-venc.atrasada{ color:var(--coral); }
+  .item-venc.proxima{ color:var(--amber); }
   .item-valor{
     font-family:'IBM Plex Mono', monospace;
     font-weight:600;
     font-size:14px;
+    white-space:nowrap;
   }
   .badge{
     display:inline-block;
@@ -108,6 +129,10 @@
   }
   .badge.pendente{ background:#FBEAE7; color:var(--coral); }
   .badge.pago{ background:#E4F0EA; color:var(--teal-light); }
+  .badge.fixo{ background:#EDE7FB; color:#6A4FC4; }
+  html[data-tema="escuro"] .badge.pendente{ background:#3A2420; }
+  html[data-tema="escuro"] .badge.pago{ background:#1E3129; }
+  html[data-tema="escuro"] .badge.fixo{ background:#2A2440; }
   .empty{
     text-align:center;
     color:var(--ink-soft);
@@ -123,15 +148,19 @@
     border:1px solid var(--border);
     font-size:15px;
     font-family:'Inter', sans-serif;
-    background:#FAFBFA;
+    background:var(--bg);
+    color:var(--ink);
   }
+  .check-row{ display:flex; align-items:center; gap:8px; }
+  .check-row input[type="checkbox"]{ width:auto; accent-color:var(--teal-light); }
+  .check-row label{ margin:0; }
   .toggle-tipo{ display:flex; gap:8px; }
   .toggle-tipo button{
     flex:1;
     padding:12px;
     border-radius:10px;
     border:1px solid var(--border);
-    background:#FAFBFA;
+    background:var(--bg);
     font-weight:600;
     font-size:14px;
     color:var(--ink-soft);
@@ -148,31 +177,40 @@
     font-size:15px;
     margin-top:4px;
   }
+  .btn-secundario{
+    background:var(--bg);
+    border:1px solid var(--border);
+    color:var(--ink);
+    padding:12px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:14px;
+  }
   nav{
     position:fixed;
     bottom:0; left:0; right:0;
-    background:#fff;
+    background:var(--card);
     border-top:1px solid var(--border);
     display:flex;
-    padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+    padding:6px 2px calc(6px + env(safe-area-inset-bottom));
   }
   nav button{
     flex:1;
     background:none;
     border:none;
-    font-size:11px;
+    font-size:10px;
     color:var(--ink-soft);
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:4px;
+    gap:3px;
     padding:6px 0;
     font-family:'Inter', sans-serif;
   }
-  nav button .ic{ font-size:18px; }
-  nav button.ativo{ color:var(--teal); font-weight:600; }
+  nav button .ic{ font-size:17px; }
+  nav button.ativo{ color:var(--teal-light); font-weight:600; }
   .hidden{ display:none; }
-  .item-acoes{ display:flex; gap:10px; margin-left:10px; }
+  .item-acoes{ display:flex; gap:8px; align-items:center; flex-shrink:0; }
   .item-acoes button{
     background:none;
     border:none;
@@ -180,6 +218,16 @@
     padding:4px;
     color:var(--ink-soft);
   }
+  .btn-pagar{
+    background:#E4F0EA;
+    color:var(--teal-light);
+    border:none;
+    border-radius:8px;
+    padding:6px 9px;
+    font-size:11px;
+    font-weight:700;
+  }
+  html[data-tema="escuro"] .btn-pagar{ background:#1E3129; }
   .item-linha{ display:flex; justify-content:space-between; align-items:center; }
   .cat-row{
     display:flex;
@@ -211,6 +259,7 @@
     width:100%;
     margin-top:8px;
   }
+  html[data-tema="escuro"] .btn-perigo{ background:#3A2420; border-color:#5A3530; }
   .btn-cancelar{
     background:none;
     border:1px solid var(--border);
@@ -220,6 +269,87 @@
     font-weight:600;
     font-size:14px;
   }
+  /* Navegação por mês */
+  .month-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .month-nav button{
+    background:var(--card);
+    border:1px solid var(--border);
+    color:var(--ink);
+    border-radius:10px;
+    padding:8px 14px;
+    font-weight:700;
+    font-size:14px;
+  }
+  .month-nav .mes-label{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:15px;
+    text-transform:capitalize;
+  }
+  /* Barras de progresso (orçamento / metas) */
+  .progress-track{
+    background:var(--border);
+    border-radius:20px;
+    height:8px;
+    overflow:hidden;
+    margin-top:8px;
+  }
+  .progress-fill{ height:100%; border-radius:20px; transition:width .2s; }
+  .progress-fill.ok{ background:var(--teal-light); }
+  .progress-fill.warn{ background:var(--amber); }
+  .progress-fill.over{ background:var(--coral); }
+  .orc-row{ padding:12px 0; border-bottom:1px solid var(--border); }
+  .orc-row:last-child{ border-bottom:none; }
+  .orc-header{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .orc-nome{ font-size:14px; font-weight:500; }
+  .orc-header input{ width:100px; padding:7px 9px; font-size:13px; border-radius:8px; }
+  .orc-sub{ font-size:12px; color:var(--ink-soft); margin-top:6px; }
+  /* Metas */
+  .meta-card{ padding:14px 0; border-bottom:1px solid var(--border); }
+  .meta-card:last-child{ border-bottom:none; }
+  .meta-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .meta-nome{ font-weight:600; font-size:14px; }
+  .meta-prazo{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
+  .meta-valores{ font-size:12px; color:var(--ink-soft); margin-top:8px; }
+  .meta-acoes{ display:flex; gap:8px; margin-top:10px; }
+  .meta-acoes button{ flex:1; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--ink); font-size:12px; font-weight:600; }
+  .form-meta{ display:flex; flex-direction:column; gap:10px; margin-top:14px; padding-top:14px; border-top:1px dashed var(--border); }
+  .form-meta .linha{ display:flex; gap:8px; }
+  /* Gráfico de barras por categoria */
+  .chart-bar-row{ display:flex; align-items:center; gap:8px; padding:7px 0; }
+  .chart-bar-label{ width:96px; flex-shrink:0; font-size:12px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .chart-bar-track{ flex:1; background:var(--border); height:14px; border-radius:6px; overflow:hidden; }
+  .chart-bar-fill{ height:100%; background:var(--coral); border-radius:6px; }
+  .chart-bar-fill.entrada{ background:var(--teal-light); }
+  .chart-bar-valor{ width:76px; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:11px; flex-shrink:0; }
+  /* Evolução mensal (SVG) */
+  .evolucao-svg{ width:100%; height:120px; margin-top:6px; }
+  .evolucao-legenda{ display:flex; gap:14px; font-size:11px; color:var(--ink-soft); margin-top:8px; }
+  .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; }
+  /* Filtros do histórico */
+  .filtros{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .filtros input, .filtros select{ flex:1; min-width:130px; padding:10px 12px; font-size:13px; }
+  /* Config: toggle tema */
+  .switch-row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; }
+  .switch{ position:relative; width:46px; height:26px; flex-shrink:0; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch .slider{ position:absolute; inset:0; background:var(--border); border-radius:20px; cursor:pointer; transition:.2s; }
+  .switch .slider:before{ content:""; position:absolute; width:20px; height:20px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
+  .switch input:checked + .slider{ background:var(--teal-light); }
+  .switch input:checked + .slider:before{ transform:translateX(20px); }
+  .row-2{ display:flex; gap:10px; }
+  .row-2 > *{ flex:1; }
+  .file-label{
+    display:block; text-align:center;
+    background:var(--bg); border:1px solid var(--border); color:var(--ink);
+    padding:12px; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer;
+  }
+  .hint{ font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.5; }
 </style>
 </head>
 <body>
@@ -233,6 +363,12 @@
 
   <!-- TELA 1: DASHBOARD -->
   <section id="tela-dashboard">
+    <div class="month-nav">
+      <button type="button" id="dash-mes-anterior">‹</button>
+      <div class="mes-label" id="dash-mes-label">—</div>
+      <button type="button" id="dash-mes-proximo">›</button>
+    </div>
+
     <div class="card">
       <div class="saldo-label">Saldo do mês</div>
       <div class="saldo-valor" id="saldo-valor">R$ 0,00</div>
@@ -251,6 +387,11 @@
     <div class="section-title">Pendências mais próximas</div>
     <div class="card" id="lista-pendencias-dashboard">
       <div class="empty">Nenhuma conta pendente 🎉</div>
+    </div>
+
+    <div class="section-title">Gastos por categoria</div>
+    <div class="card" id="dash-grafico-categorias">
+      <div class="empty">Sem gastos registrados neste mês</div>
     </div>
 
     <div class="section-title">Últimos lançamentos</div>
@@ -283,9 +424,22 @@
           <select id="f-categoria"></select>
         </div>
 
-        <div>
-          <label>Data</label>
-          <input type="date" id="f-data" required>
+        <div class="row-2">
+          <div>
+            <label>Data</label>
+            <input type="date" id="f-data" required>
+          </div>
+          <div>
+            <label>Forma de pagamento</label>
+            <select id="f-forma">
+              <option value="Dinheiro">Dinheiro</option>
+              <option value="Pix">Pix</option>
+              <option value="Débito">Débito</option>
+              <option value="Crédito">Crédito</option>
+              <option value="Transferência">Transferência</option>
+              <option value="Boleto">Boleto</option>
+            </select>
+          </div>
         </div>
 
         <div id="wrap-status">
@@ -294,6 +448,11 @@
             <option value="pago">Pago / Recebido</option>
             <option value="pendente">Pendente</option>
           </select>
+        </div>
+
+        <div class="check-row" id="wrap-recorrente">
+          <input type="checkbox" id="f-recorrente">
+          <label for="f-recorrente">🔁 Repetir todo mês (lançamento fixo)</label>
         </div>
 
         <button type="submit" class="btn-salvar" id="btn-salvar-transacao">Salvar lançamento</button>
@@ -312,13 +471,65 @@
 
   <!-- TELA 4: HISTÓRICO -->
   <section id="tela-historico" class="hidden">
-    <div class="section-title">Todos os lançamentos</div>
+    <div class="filtros">
+      <input type="text" id="hist-busca" placeholder="🔎 Buscar descrição...">
+      <select id="hist-tipo">
+        <option value="todos">Todos os tipos</option>
+        <option value="entrada">Entradas</option>
+        <option value="saida">Saídas</option>
+      </select>
+      <select id="hist-categoria">
+        <option value="todas">Todas categorias</option>
+      </select>
+      <select id="hist-mes">
+        <option value="todos">Todos os meses</option>
+      </select>
+    </div>
+    <div class="section-title">Lançamentos</div>
     <div class="card" id="lista-historico">
       <div class="empty">Nenhum lançamento ainda</div>
     </div>
   </section>
 
-  <!-- TELA 5: CONFIGURAÇÕES -->
+  <!-- TELA 5: RESUMO (orçamentos, metas e gráficos) -->
+  <section id="tela-resumo" class="hidden">
+    <div class="month-nav">
+      <button type="button" id="resumo-mes-anterior">‹</button>
+      <div class="mes-label" id="resumo-mes-label">—</div>
+      <button type="button" id="resumo-mes-proximo">›</button>
+    </div>
+
+    <div class="section-title">Orçamento por categoria</div>
+    <div class="card" id="lista-orcamentos">
+      <div class="empty">Cadastre categorias de saída para definir orçamentos</div>
+    </div>
+
+    <div class="section-title">Metas de economia</div>
+    <div class="card">
+      <div id="lista-metas">
+        <div class="empty">Nenhuma meta cadastrada ainda</div>
+      </div>
+      <div class="form-meta">
+        <input type="text" id="meta-nome" placeholder="Nome da meta (ex: Viagem, Reserva de emergência)">
+        <div class="linha">
+          <input type="number" id="meta-valor-alvo" step="0.01" placeholder="Valor alvo (R$)">
+          <input type="date" id="meta-prazo">
+        </div>
+        <button type="button" class="btn-salvar" id="btn-add-meta">Criar meta</button>
+      </div>
+    </div>
+
+    <div class="section-title">Evolução (6 meses)</div>
+    <div class="card" id="card-evolucao">
+      <svg class="evolucao-svg" id="evolucao-svg" viewBox="0 0 300 120" preserveAspectRatio="none"></svg>
+      <div class="evolucao-legenda">
+        <span><span class="dot" style="background:var(--teal-light)"></span>Entradas</span>
+        <span><span class="dot" style="background:var(--coral)"></span>Saídas</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TELA 6: CONFIGURAÇÕES -->
   <section id="tela-config" class="hidden">
     <div class="section-title">Categorias</div>
     <div class="card">
@@ -331,6 +542,33 @@
         </select>
         <button type="button" id="btn-add-categoria">+</button>
       </div>
+    </div>
+
+    <div class="section-title">Lançamentos fixos</div>
+    <div class="card" id="lista-recorrentes">
+      <div class="empty">Nenhum lançamento fixo cadastrado</div>
+    </div>
+
+    <div class="section-title">Aparência</div>
+    <div class="card">
+      <div class="switch-row">
+        <span>Modo escuro</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-tema">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="section-title">Backup dos dados</div>
+    <div class="card">
+      <div class="row-2">
+        <button type="button" class="btn-secundario" id="btn-exportar-json">⬇️ Exportar (.json)</button>
+        <button type="button" class="btn-secundario" id="btn-exportar-csv">⬇️ Exportar (.csv)</button>
+      </div>
+      <label class="file-label" for="input-importar" style="margin-top:10px;">⬆️ Importar backup (.json)</label>
+      <input type="file" id="input-importar" accept="application/json" class="hidden">
+      <div class="hint">Exporte regularmente para não perder seus dados. O arquivo .json pode ser usado para restaurar tudo; o .csv serve para abrir numa planilha.</div>
     </div>
 
     <div class="section-title">Dados</div>
@@ -346,32 +584,65 @@
   <button data-tela="nova"><span class="ic">➕</span>Novo</button>
   <button data-tela="contas"><span class="ic">⏰</span>Contas</button>
   <button data-tela="historico"><span class="ic">📋</span>Histórico</button>
+  <button data-tela="resumo"><span class="ic">📊</span>Resumo</button>
   <button data-tela="config"><span class="ic">⚙️</span>Config</button>
 </nav>
 
 <script>
 /* ---------- 1. "BANCO DE DADOS" (localStorage) ---------- */
-// Guardamos tudo num único objeto salvo no localStorage do navegador.
-// Isso funciona offline e não depende de servidor.
 const DB_KEY = "financas_dados_v1";
+let contadorId = 0;
+function gerarId(prefixo){
+  contadorId++;
+  return prefixo + Date.now() + "_" + contadorId;
+}
 
-function carregarDados(){
-  const bruto = localStorage.getItem(DB_KEY);
-  if(bruto) return JSON.parse(bruto);
-  // Estado inicial: já vem com categorias padrão pra não começar vazio
+function estadoPadrao(){
   return {
     transacoes: [],
     categorias: [
       {id:"c1", nome:"Renda/Salário", tipo:"entrada"},
-      {id:"c2", nome:"Vendas", tipo:"entrada"},
-      {id:"c3", nome:"Outros ganhos", tipo:"entrada"},
-      {id:"c4", nome:"Moradia", tipo:"saida"},
-      {id:"c5", nome:"Alimentação", tipo:"saida"},
-      {id:"c6", nome:"Transporte", tipo:"saida"},
-      {id:"c7", nome:"Contas fixas (água/luz)", tipo:"saida"},
-      {id:"c8", nome:"Outros gastos", tipo:"saida"}
-    ]
+      {id:"c2", nome:"Freelance/Extra", tipo:"entrada"},
+      {id:"c3", nome:"Vendas", tipo:"entrada"},
+      {id:"c4", nome:"Investimentos", tipo:"entrada"},
+      {id:"c5", nome:"Outros ganhos", tipo:"entrada"},
+      {id:"c6", nome:"Moradia", tipo:"saida"},
+      {id:"c7", nome:"Alimentação", tipo:"saida"},
+      {id:"c8", nome:"Transporte", tipo:"saida"},
+      {id:"c9", nome:"Contas fixas (água/luz)", tipo:"saida"},
+      {id:"c10", nome:"Saúde", tipo:"saida"},
+      {id:"c11", nome:"Educação", tipo:"saida"},
+      {id:"c12", nome:"Lazer", tipo:"saida"},
+      {id:"c13", nome:"Outros gastos", tipo:"saida"}
+    ],
+    orcamentos: [],
+    metas: [],
+    recorrentes: [],
+    config: { tema: "claro" }
   };
+}
+
+// Garante que dados salvos antigamente (versões anteriores do app) ganhem os campos novos
+function normalizarEstado(obj){
+  const base = estadoPadrao();
+  if(!obj || typeof obj !== "object") return base;
+  return {
+    transacoes: Array.isArray(obj.transacoes) ? obj.transacoes : [],
+    categorias: Array.isArray(obj.categorias) && obj.categorias.length ? obj.categorias : base.categorias,
+    orcamentos: Array.isArray(obj.orcamentos) ? obj.orcamentos : [],
+    metas: Array.isArray(obj.metas) ? obj.metas : [],
+    recorrentes: Array.isArray(obj.recorrentes) ? obj.recorrentes : [],
+    config: obj.config && typeof obj.config === "object" ? { tema: obj.config.tema === "escuro" ? "escuro" : "claro" } : { tema: "claro" }
+  };
+}
+
+function carregarDados(){
+  const bruto = localStorage.getItem(DB_KEY);
+  if(bruto){
+    try{ return normalizarEstado(JSON.parse(bruto)); }
+    catch(e){ return estadoPadrao(); }
+  }
+  return estadoPadrao();
 }
 
 function salvarDados(){
@@ -381,8 +652,19 @@ function salvarDados(){
 let estado = carregarDados();
 let tipoSelecionado = "entrada";
 
-/* ---------- 2. NAVEGAÇÃO ENTRE TELAS ---------- */
-const telas = ["dashboard","nova","contas","historico","config"];
+/* ---------- 2. TEMA (claro/escuro) ---------- */
+function aplicarTema(){
+  document.documentElement.setAttribute("data-tema", estado.config.tema);
+  document.getElementById("toggle-tema").checked = estado.config.tema === "escuro";
+}
+document.getElementById("toggle-tema").addEventListener("change", (e)=>{
+  estado.config.tema = e.target.checked ? "escuro" : "claro";
+  salvarDados();
+  aplicarTema();
+});
+
+/* ---------- 3. NAVEGAÇÃO ENTRE TELAS ---------- */
+const telas = ["dashboard","nova","contas","historico","resumo","config"];
 document.querySelectorAll("nav button").forEach(btn=>{
   btn.addEventListener("click", ()=>{
     const alvo = btn.dataset.tela;
@@ -391,15 +673,110 @@ document.querySelectorAll("nav button").forEach(btn=>{
     });
     document.querySelectorAll("nav button").forEach(b=>b.classList.remove("ativo"));
     btn.classList.add("ativo");
-    // Se o usuário sair da tela "nova" sem salvar, cancela qualquer edição pendente
     if(alvo!=="nova") cancelarEdicao();
     if(alvo==="nova") prepararFormulario();
     renderizarTudo();
   });
 });
 
-/* ---------- 3. FORMULÁRIO DE NOVA TRANSAÇÃO (e edição) ---------- */
-let editandoId = null; // null = criando nova; senão, guarda o id da transação em edição
+/* ---------- 4. MESES DE REFERÊNCIA (dashboard e resumo navegam por mês) ---------- */
+const hojeReal = new Date();
+let mesRefDash = { ano: hojeReal.getFullYear(), mes: hojeReal.getMonth() };
+let mesRefResumo = { ano: hojeReal.getFullYear(), mes: hojeReal.getMonth() };
+
+const NOMES_MESES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+
+function chaveAnoMes(ano, mes){ return ano + "-" + String(mes+1).padStart(2,"0"); }
+function labelMes(ref){ return NOMES_MESES[ref.mes] + " de " + ref.ano; }
+
+function mudarMes(ref, delta){
+  let m = ref.mes + delta;
+  let a = ref.ano;
+  if(m < 0){ m = 11; a--; }
+  if(m > 11){ m = 0; a++; }
+  ref.mes = m; ref.ano = a;
+  gerarRecorrentesParaMes(a, m);
+}
+
+document.getElementById("dash-mes-anterior").addEventListener("click", ()=>{ mudarMes(mesRefDash,-1); renderizarTudo(); });
+document.getElementById("dash-mes-proximo").addEventListener("click", ()=>{ mudarMes(mesRefDash,1); renderizarTudo(); });
+document.getElementById("resumo-mes-anterior").addEventListener("click", ()=>{ mudarMes(mesRefResumo,-1); renderizarTudo(); });
+document.getElementById("resumo-mes-proximo").addEventListener("click", ()=>{ mudarMes(mesRefResumo,1); renderizarTudo(); });
+
+function transacoesDoMesRef(ref){
+  return estado.transacoes.filter(t=>{
+    const d = new Date(t.data+"T00:00:00");
+    return d.getFullYear()===ref.ano && d.getMonth()===ref.mes;
+  });
+}
+
+/* ---------- 5. LANÇAMENTOS FIXOS (recorrentes) ---------- */
+function diasNoMes(ano, mes){ return new Date(ano, mes+1, 0).getDate(); }
+
+// Cria a transação do mês a partir de um modelo recorrente, se ainda não existir
+function gerarRecorrentesParaMes(ano, mes){
+  const chave = chaveAnoMes(ano, mes);
+  estado.recorrentes.forEach(r=>{
+    if(chave < r.inicioAnoMes) return; // ainda não começou nessa data
+    const jaExiste = estado.transacoes.some(t=>t.recorrenteId===r.id && t.mesRef===chave);
+    if(jaExiste) return;
+    const dia = Math.min(r.dia, diasNoMes(ano, mes));
+    const dataStr = ano + "-" + String(mes+1).padStart(2,"0") + "-" + String(dia).padStart(2,"0");
+    estado.transacoes.push({
+      id: gerarId("t"),
+      tipo: r.tipo,
+      descricao: r.descricao,
+      valor: r.valor,
+      categoria: r.categoria,
+      formaPagamento: r.formaPagamento,
+      data: dataStr,
+      status: r.tipo==="entrada" ? "pago" : "pendente",
+      recorrenteId: r.id,
+      mesRef: chave
+    });
+  });
+  salvarDados();
+}
+
+// Ao abrir o app, garante que os fixos já existam até o mês atual
+function gerarRecorrentesAteHoje(){
+  estado.recorrentes.forEach(r=>{
+    let [a,m] = r.inicioAnoMes.split("-").map(Number);
+    m -= 1;
+    while(a < hojeReal.getFullYear() || (a===hojeReal.getFullYear() && m<=hojeReal.getMonth())){
+      gerarRecorrentesParaMes(a, m);
+      m++; if(m>11){ m=0; a++; }
+    }
+  });
+}
+
+function renderizarRecorrentes(){
+  const el = document.getElementById("lista-recorrentes");
+  if(!estado.recorrentes.length){
+    el.innerHTML = '<div class="empty">Nenhum lançamento fixo cadastrado</div>';
+    return;
+  }
+  el.innerHTML = estado.recorrentes.map(r=>`
+    <div class="cat-row">
+      <div>
+        <div class="cat-nome">${r.descricao} <span class="badge fixo">🔁 fixo</span></div>
+        <div class="cat-tipo-tag">${nomeCategoria(r.categoria)} · ${formatarMoeda(r.valor)} todo dia ${r.dia}</div>
+      </div>
+      <div class="cat-acoes">
+        <button type="button" onclick="pararRecorrente('${r.id}')" title="Parar repetição">🗑️</button>
+      </div>
+    </div>`).join("");
+}
+
+function pararRecorrente(id){
+  if(!confirm("Parar esse lançamento fixo? Os lançamentos já gerados continuam existindo, só não serão mais criados nos próximos meses.")) return;
+  estado.recorrentes = estado.recorrentes.filter(r=>r.id!==id);
+  salvarDados();
+  renderizarTudo();
+}
+
+/* ---------- 6. FORMULÁRIO DE NOVA TRANSAÇÃO (e edição) ---------- */
+let editandoId = null;
 
 function prepararFormulario(){
   document.getElementById("f-data").valueAsDate = new Date();
@@ -410,6 +787,7 @@ function cancelarEdicao(){
   editandoId = null;
   document.getElementById("btn-salvar-transacao").textContent = "Salvar lançamento";
   document.getElementById("btn-cancelar-edicao").classList.add("hidden");
+  document.getElementById("wrap-recorrente").classList.remove("hidden");
   document.getElementById("form-transacao").reset();
 }
 document.getElementById("btn-cancelar-edicao").addEventListener("click", ()=>{
@@ -417,7 +795,6 @@ document.getElementById("btn-cancelar-edicao").addEventListener("click", ()=>{
   prepararFormulario();
 });
 
-// Preenche o formulário com os dados de uma transação existente e entra em modo edição
 function editarTransacao(id){
   const t = estado.transacoes.find(t=>t.id===id);
   if(!t) return;
@@ -427,9 +804,13 @@ function editarTransacao(id){
   document.getElementById("f-valor").value = t.valor;
   document.getElementById("f-categoria").value = t.categoria;
   document.getElementById("f-data").value = t.data;
+  document.getElementById("f-forma").value = t.formaPagamento || "Dinheiro";
   if(t.tipo==="saida") document.getElementById("f-status").value = t.status;
   document.getElementById("btn-salvar-transacao").textContent = "Salvar alterações";
   document.getElementById("btn-cancelar-edicao").classList.remove("hidden");
+  // Não permite marcar como fixo ao editar uma ocorrência já existente
+  document.getElementById("wrap-recorrente").classList.add("hidden");
+  document.getElementById("f-recorrente").checked = false;
   document.querySelector('nav button[data-tela="nova"]').click();
 }
 
@@ -441,12 +822,19 @@ function apagarTransacao(id){
   renderizarTudo();
 }
 
+function marcarComoPago(id){
+  const t = estado.transacoes.find(t=>t.id===id);
+  if(!t) return;
+  t.status = "pago";
+  salvarDados();
+  renderizarTudo();
+}
+
 function selecionarTipo(tipo){
   tipoSelecionado = tipo;
   document.getElementById("btn-tipo-entrada").className = tipo==="entrada" ? "ativo-entrada" : "";
   document.getElementById("btn-tipo-saida").className = tipo==="saida" ? "ativo-saida" : "";
   document.getElementById("wrap-status").style.display = tipo==="saida" ? "block" : "none";
-  // Preenche o select de categoria só com categorias do tipo escolhido
   const select = document.getElementById("f-categoria");
   select.innerHTML = "";
   estado.categorias.filter(c=>c.tipo===tipo).forEach(c=>{
@@ -460,55 +848,80 @@ document.getElementById("btn-tipo-entrada").addEventListener("click", ()=>seleci
 document.getElementById("btn-tipo-saida").addEventListener("click", ()=>selecionarTipo("saida"));
 
 document.getElementById("form-transacao").addEventListener("submit", (e)=>{
-  e.preventDefault(); // impede recarregar a página
+  e.preventDefault();
+  const dataInformada = document.getElementById("f-data").value;
   const dados = {
     tipo: tipoSelecionado,
     descricao: document.getElementById("f-descricao").value,
     valor: parseFloat(document.getElementById("f-valor").value),
     categoria: document.getElementById("f-categoria").value,
-    data: document.getElementById("f-data").value,
+    data: dataInformada,
+    formaPagamento: document.getElementById("f-forma").value,
     status: tipoSelecionado==="entrada" ? "pago" : document.getElementById("f-status").value
   };
 
   if(editandoId){
-    // Modo edição: encontra a transação existente e substitui os campos, mantendo o id
     const idx = estado.transacoes.findIndex(t=>t.id===editandoId);
-    if(idx > -1) estado.transacoes[idx] = { id: editandoId, ...dados };
+    if(idx > -1) estado.transacoes[idx] = { ...estado.transacoes[idx], ...dados };
   } else {
-    // Modo criação: adiciona uma transação nova
-    estado.transacoes.push({ id: "t"+Date.now(), ...dados });
+    const novoId = gerarId("t");
+    const marcarFixo = document.getElementById("f-recorrente").checked;
+    let extras = {};
+    if(marcarFixo){
+      const [a,m,d] = dataInformada.split("-").map(Number);
+      const recId = gerarId("r");
+      const inicioAnoMes = a + "-" + String(m).padStart(2,"0");
+      estado.recorrentes.push({
+        id: recId,
+        tipo: dados.tipo,
+        descricao: dados.descricao,
+        valor: dados.valor,
+        categoria: dados.categoria,
+        formaPagamento: dados.formaPagamento,
+        dia: d,
+        inicioAnoMes
+      });
+      extras = { recorrenteId: recId, mesRef: inicioAnoMes };
+    }
+    estado.transacoes.push({ id: novoId, ...dados, ...extras });
   }
 
   salvarDados();
   cancelarEdicao();
   prepararFormulario();
-  // Volta pro dashboard depois de salvar
   document.querySelector('nav button[data-tela="dashboard"]').click();
 });
 
-/* ---------- 4. CÁLCULOS ---------- */
+/* ---------- 7. AUXILIARES ---------- */
 function nomeCategoria(id){
   const c = estado.categorias.find(c=>c.id===id);
-  return c ? c.nome : "";
+  return c ? c.nome : "(categoria removida)";
 }
 
 function formatarMoeda(v){
-  return v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+  return (v||0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
 }
 
-function transacoesDoMesAtual(){
-  const hoje = new Date();
-  return estado.transacoes.filter(t=>{
-    const d = new Date(t.data+"T00:00:00");
-    return d.getMonth()===hoje.getMonth() && d.getFullYear()===hoje.getFullYear();
-  });
+function diasEntre(dataStr){
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const d = new Date(dataStr+"T00:00:00");
+  return Math.round((d - hoje) / 86400000);
 }
 
-/* ---------- 5. RENDERIZAÇÃO DAS TELAS ---------- */
+function badgeVencimento(t){
+  if(t.status!=="pendente") return "";
+  const dif = diasEntre(t.data);
+  if(dif < 0) return `<div class="item-venc atrasada">⚠️ atrasada há ${Math.abs(dif)} dia(s)</div>`;
+  if(dif === 0) return `<div class="item-venc proxima">vence hoje</div>`;
+  if(dif <= 5) return `<div class="item-venc proxima">vence em ${dif} dia(s)</div>`;
+  return "";
+}
+
+/* ---------- 8. RENDERIZAÇÃO: DASHBOARD ---------- */
 function renderizarDashboard(){
-  const doMes = transacoesDoMesAtual();
+  document.getElementById("dash-mes-label").textContent = labelMes(mesRefDash);
+  const doMes = transacoesDoMesRef(mesRefDash);
   const entradas = doMes.filter(t=>t.tipo==="entrada").reduce((s,t)=>s+t.valor,0);
-  // só contamos saída "paga" no saldo — pendente ainda não saiu do bolso
   const saidasPagas = doMes.filter(t=>t.tipo==="saida" && t.status==="pago").reduce((s,t)=>s+t.valor,0);
   const saldo = entradas - saidasPagas;
 
@@ -519,7 +932,6 @@ function renderizarDashboard(){
   document.getElementById("total-entradas").textContent = formatarMoeda(entradas);
   document.getElementById("total-saidas").textContent = formatarMoeda(saidasPagas);
 
-  // Pendências (próximas 3)
   const pendentes = estado.transacoes
     .filter(t=>t.status==="pendente")
     .sort((a,b)=> new Date(a.data) - new Date(b.data))
@@ -527,38 +939,29 @@ function renderizarDashboard(){
   const elPend = document.getElementById("lista-pendencias-dashboard");
   elPend.innerHTML = pendentes.length ? pendentes.map(itemHTML).join("") : '<div class="empty">Nenhuma conta pendente 🎉</div>';
 
-  // Últimos 5 lançamentos
   const recentes = [...estado.transacoes].sort((a,b)=> new Date(b.data)-new Date(a.data)).slice(0,5);
   const elRec = document.getElementById("lista-recentes");
   elRec.innerHTML = recentes.length ? recentes.map(itemHTML).join("") : '<div class="empty">Nenhum lançamento ainda</div>';
-}
 
-function renderizarContas(){
-  const pendentes = estado.transacoes
-    .filter(t=>t.status==="pendente")
-    .sort((a,b)=> new Date(a.data) - new Date(b.data));
-  const el = document.getElementById("lista-pendentes-full");
-  el.innerHTML = pendentes.length ? pendentes.map(itemHTML).join("") : '<div class="empty">Nenhuma conta pendente</div>';
-}
-
-function renderizarHistorico(){
-  const todos = [...estado.transacoes].sort((a,b)=> new Date(b.data)-new Date(a.data));
-  const el = document.getElementById("lista-historico");
-  el.innerHTML = todos.length ? todos.map(itemHTML).join("") : '<div class="empty">Nenhum lançamento ainda</div>';
+  renderizarGraficoCategoria("dash-grafico-categorias", doMes.filter(t=>t.tipo==="saida"), "saida");
 }
 
 function itemHTML(t){
   const sinal = t.tipo==="entrada" ? "+" : "−";
   const cor = t.tipo==="entrada" ? "var(--teal-light)" : "var(--coral)";
-  const badge = t.status==="pendente" ? '<span class="badge pendente">pendente</span>' : (t.tipo==="saida" ? '<span class="badge pago">pago</span>' : '');
+  const badgeStatus = t.status==="pendente" ? '<span class="badge pendente">pendente</span>' : (t.tipo==="saida" ? '<span class="badge pago">pago</span>' : '');
+  const badgeFixo = t.recorrenteId ? '<span class="badge fixo">🔁</span>' : '';
   const dataFmt = new Date(t.data+"T00:00:00").toLocaleDateString('pt-BR');
+  const btnPagar = t.status==="pendente" ? `<button type="button" class="btn-pagar" onclick="marcarComoPago('${t.id}')">✓ Pagar</button>` : "";
   return `
     <div class="item">
       <div>
-        <div class="item-desc">${t.descricao} ${badge}</div>
-        <div class="item-cat">${nomeCategoria(t.categoria)} · ${dataFmt}</div>
+        <div class="item-desc">${t.descricao} ${badgeStatus}${badgeFixo}</div>
+        <div class="item-cat">${nomeCategoria(t.categoria)} · ${dataFmt} · ${t.formaPagamento||"Dinheiro"}</div>
+        ${badgeVencimento(t)}
       </div>
       <div class="item-linha">
+        ${btnPagar}
         <div class="item-valor" style="color:${cor}">${sinal} ${formatarMoeda(t.valor)}</div>
         <div class="item-acoes">
           <button type="button" onclick="editarTransacao('${t.id}')" title="Editar">✏️</button>
@@ -568,31 +971,237 @@ function itemHTML(t){
     </div>`;
 }
 
-function renderizarTudo(){
-  renderizarDashboard();
-  renderizarContas();
-  renderizarHistorico();
-  renderizarConfig();
+/* ---------- 9. RENDERIZAÇÃO: CONTAS A PAGAR ---------- */
+function renderizarContas(){
+  const pendentes = estado.transacoes
+    .filter(t=>t.status==="pendente")
+    .sort((a,b)=> new Date(a.data) - new Date(b.data));
+  const el = document.getElementById("lista-pendentes-full");
+  el.innerHTML = pendentes.length ? pendentes.map(itemHTML).join("") : '<div class="empty">Nenhuma conta pendente</div>';
 }
 
-/* ---------- 5b. CONFIGURAÇÕES: categorias e apagar dados ---------- */
+/* ---------- 10. RENDERIZAÇÃO: HISTÓRICO (com filtros) ---------- */
+function popularFiltrosHistorico(){
+  const selCat = document.getElementById("hist-categoria");
+  const catAtual = selCat.value;
+  selCat.innerHTML = '<option value="todas">Todas categorias</option>' +
+    estado.categorias.map(c=>`<option value="${c.id}">${c.nome}</option>`).join("");
+  if([...selCat.options].some(o=>o.value===catAtual)) selCat.value = catAtual;
+
+  const selMes = document.getElementById("hist-mes");
+  const mesAtualSel = selMes.value;
+  const chaves = [...new Set(estado.transacoes.map(t=>t.data.slice(0,7)))].sort().reverse();
+  selMes.innerHTML = '<option value="todos">Todos os meses</option>' +
+    chaves.map(k=>{
+      const [a,m] = k.split("-").map(Number);
+      return `<option value="${k}">${NOMES_MESES[m-1]} de ${a}</option>`;
+    }).join("");
+  if([...selMes.options].some(o=>o.value===mesAtualSel)) selMes.value = mesAtualSel;
+}
+
+function renderizarHistorico(){
+  popularFiltrosHistorico();
+  const busca = document.getElementById("hist-busca").value.trim().toLowerCase();
+  const tipo = document.getElementById("hist-tipo").value;
+  const categoria = document.getElementById("hist-categoria").value;
+  const mes = document.getElementById("hist-mes").value;
+
+  let lista = [...estado.transacoes];
+  if(busca) lista = lista.filter(t=>t.descricao.toLowerCase().includes(busca));
+  if(tipo!=="todos") lista = lista.filter(t=>t.tipo===tipo);
+  if(categoria!=="todas") lista = lista.filter(t=>t.categoria===categoria);
+  if(mes!=="todos") lista = lista.filter(t=>t.data.slice(0,7)===mes);
+
+  lista.sort((a,b)=> new Date(b.data)-new Date(a.data));
+  const el = document.getElementById("lista-historico");
+  el.innerHTML = lista.length ? lista.map(itemHTML).join("") : '<div class="empty">Nenhum lançamento encontrado</div>';
+}
+["hist-busca","hist-tipo","hist-categoria","hist-mes"].forEach(id=>{
+  document.getElementById(id).addEventListener("input", renderizarHistorico);
+  document.getElementById(id).addEventListener("change", renderizarHistorico);
+});
+
+/* ---------- 11. RENDERIZAÇÃO: RESUMO (orçamentos, metas, gráficos) ---------- */
+function orcamentoDaCategoria(catId){
+  const o = estado.orcamentos.find(o=>o.categoria===catId);
+  return o ? o.valor : 0;
+}
+function definirOrcamento(catId, valor){
+  const v = parseFloat(valor) || 0;
+  const idx = estado.orcamentos.findIndex(o=>o.categoria===catId);
+  if(v<=0){
+    if(idx>-1) estado.orcamentos.splice(idx,1);
+  } else if(idx>-1){
+    estado.orcamentos[idx].valor = v;
+  } else {
+    estado.orcamentos.push({ categoria: catId, valor: v });
+  }
+  salvarDados();
+}
+
+function renderizarOrcamentos(){
+  document.getElementById("resumo-mes-label").textContent = labelMes(mesRefResumo);
+  const categoriasSaida = estado.categorias.filter(c=>c.tipo==="saida");
+  const el = document.getElementById("lista-orcamentos");
+  if(!categoriasSaida.length){
+    el.innerHTML = '<div class="empty">Cadastre categorias de saída para definir orçamentos</div>';
+    return;
+  }
+  const doMes = transacoesDoMesRef(mesRefResumo).filter(t=>t.tipo==="saida");
+  el.innerHTML = categoriasSaida.map(c=>{
+    const orcamento = orcamentoDaCategoria(c.id);
+    const gasto = doMes.filter(t=>t.categoria===c.id).reduce((s,t)=>s+t.valor,0);
+    let barra = "";
+    if(orcamento>0){
+      const pct = Math.min(100, (gasto/orcamento)*100);
+      const classe = gasto>orcamento ? "over" : (pct>=80 ? "warn" : "ok");
+      barra = `
+        <div class="progress-track"><div class="progress-fill ${classe}" style="width:${pct}%"></div></div>
+        <div class="orc-sub">${formatarMoeda(gasto)} de ${formatarMoeda(orcamento)} ${gasto>orcamento ? "— orçamento estourado" : ""}</div>`;
+    } else if(gasto>0){
+      barra = `<div class="orc-sub">${formatarMoeda(gasto)} gastos · sem orçamento definido</div>`;
+    }
+    return `
+      <div class="orc-row">
+        <div class="orc-header">
+          <span class="orc-nome">${c.nome}</span>
+          <input type="number" step="0.01" placeholder="0,00" value="${orcamento>0?orcamento:""}" onchange="definirOrcamento('${c.id}', this.value); renderizarTudo();">
+        </div>
+        ${barra}
+      </div>`;
+  }).join("");
+}
+
+function renderizarMetas(){
+  const el = document.getElementById("lista-metas");
+  if(!estado.metas.length){
+    el.innerHTML = '<div class="empty">Nenhuma meta cadastrada ainda</div>';
+    return;
+  }
+  el.innerHTML = estado.metas.map(m=>{
+    const pct = m.valorAlvo>0 ? Math.min(100, (m.valorAtual/m.valorAlvo)*100) : 0;
+    const classe = pct>=100 ? "ok" : (pct>=50 ? "warn" : "ok");
+    const prazoFmt = m.prazo ? new Date(m.prazo+"T00:00:00").toLocaleDateString('pt-BR') : "sem prazo";
+    return `
+      <div class="meta-card">
+        <div class="meta-top">
+          <div>
+            <div class="meta-nome">${m.nome}</div>
+            <div class="meta-prazo">Prazo: ${prazoFmt}</div>
+          </div>
+          <button type="button" onclick="apagarMeta('${m.id}')" title="Apagar meta" style="background:none;border:none;color:var(--ink-soft);font-size:14px;">🗑️</button>
+        </div>
+        <div class="progress-track"><div class="progress-fill ${classe}" style="width:${pct}%"></div></div>
+        <div class="meta-valores">${formatarMoeda(m.valorAtual)} de ${formatarMoeda(m.valorAlvo)} (${pct.toFixed(0)}%)</div>
+        <div class="meta-acoes">
+          <button type="button" onclick="ajustarMeta('${m.id}', 1)">+ Depositar</button>
+          <button type="button" onclick="ajustarMeta('${m.id}', -1)">− Retirar</button>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+document.getElementById("btn-add-meta").addEventListener("click", ()=>{
+  const nomeEl = document.getElementById("meta-nome");
+  const valorEl = document.getElementById("meta-valor-alvo");
+  const prazoEl = document.getElementById("meta-prazo");
+  const nome = nomeEl.value.trim();
+  const valorAlvo = parseFloat(valorEl.value);
+  if(!nome || !valorAlvo || valorAlvo<=0){ alert("Informe um nome e um valor alvo válido para a meta."); return; }
+  estado.metas.push({ id: gerarId("m"), nome, valorAlvo, valorAtual:0, prazo: prazoEl.value || "" });
+  salvarDados();
+  nomeEl.value=""; valorEl.value=""; prazoEl.value="";
+  renderizarTudo();
+});
+
+function ajustarMeta(id, sinal){
+  const m = estado.metas.find(m=>m.id===id);
+  if(!m) return;
+  const txt = prompt(sinal>0 ? "Quanto deseja depositar nessa meta?" : "Quanto deseja retirar dessa meta?");
+  if(txt===null) return;
+  const v = parseFloat(txt);
+  if(!v || v<=0) return;
+  m.valorAtual = Math.max(0, m.valorAtual + (sinal>0 ? v : -v));
+  salvarDados();
+  renderizarTudo();
+}
+
+function apagarMeta(id){
+  if(!confirm("Apagar esta meta de economia?")) return;
+  estado.metas = estado.metas.filter(m=>m.id!==id);
+  salvarDados();
+  renderizarTudo();
+}
+
+function renderizarGraficoCategoria(containerId, transacoes, tipo){
+  const el = document.getElementById(containerId);
+  if(!transacoes.length){
+    el.innerHTML = `<div class="empty">Sem ${tipo==="entrada"?"entradas":"gastos"} registrados neste mês</div>`;
+    return;
+  }
+  const porCategoria = {};
+  transacoes.forEach(t=>{ porCategoria[t.categoria] = (porCategoria[t.categoria]||0) + t.valor; });
+  const linhas = Object.entries(porCategoria).sort((a,b)=>b[1]-a[1]);
+  const max = linhas[0][1];
+  el.innerHTML = linhas.map(([catId,valor])=>{
+    const pct = max>0 ? (valor/max)*100 : 0;
+    return `
+      <div class="chart-bar-row">
+        <div class="chart-bar-label">${nomeCategoria(catId)}</div>
+        <div class="chart-bar-track"><div class="chart-bar-fill ${tipo}" style="width:${pct}%"></div></div>
+        <div class="chart-bar-valor">${formatarMoeda(valor)}</div>
+      </div>`;
+  }).join("");
+}
+
+function renderizarEvolucao(){
+  const meses = [];
+  for(let i=5;i>=0;i--){
+    let m = hojeReal.getMonth() - i;
+    let a = hojeReal.getFullYear();
+    while(m<0){ m+=12; a--; }
+    meses.push({ano:a, mes:m});
+  }
+  const dados = meses.map(ref=>{
+    const doMes = transacoesDoMesRef(ref);
+    const entradas = doMes.filter(t=>t.tipo==="entrada").reduce((s,t)=>s+t.valor,0);
+    const saidas = doMes.filter(t=>t.tipo==="saida").reduce((s,t)=>s+t.valor,0);
+    return { ref, entradas, saidas };
+  });
+  const max = Math.max(1, ...dados.map(d=>Math.max(d.entradas,d.saidas)));
+  const largura = 300, altura = 120, margemBase = 16, larguraGrupo = largura/dados.length;
+  let svg = "";
+  dados.forEach((d,i)=>{
+    const x0 = i*larguraGrupo;
+    const hE = (d.entradas/max) * (altura-margemBase-6);
+    const hS = (d.saidas/max) * (altura-margemBase-6);
+    const wBar = larguraGrupo/2 - 6;
+    svg += `<rect x="${x0+4}" y="${altura-margemBase-hE}" width="${wBar}" height="${hE}" fill="var(--teal-light)" rx="2"></rect>`;
+    svg += `<rect x="${x0+4+wBar+2}" y="${altura-margemBase-hS}" width="${wBar}" height="${hS}" fill="var(--coral)" rx="2"></rect>`;
+    svg += `<text x="${x0+larguraGrupo/2}" y="${altura-2}" font-size="8" text-anchor="middle" fill="var(--ink-soft)">${NOMES_MESES[d.ref.mes].slice(0,3)}</text>`;
+  });
+  document.getElementById("evolucao-svg").innerHTML = svg;
+}
+
+/* ---------- 12. CATEGORIAS (config) ---------- */
 function renderizarConfig(){
   const el = document.getElementById("lista-categorias");
   if(!estado.categorias.length){
     el.innerHTML = '<div class="empty">Nenhuma categoria cadastrada</div>';
-    return;
+  } else {
+    el.innerHTML = estado.categorias.map(c => `
+      <div class="cat-row">
+        <div>
+          <div class="cat-nome">${c.nome}</div>
+          <div class="cat-tipo-tag">${c.tipo === "entrada" ? "Entrada" : "Saída"}</div>
+        </div>
+        <div class="cat-acoes">
+          <button type="button" onclick="editarCategoria('${c.id}')" title="Editar">✏️</button>
+          <button type="button" onclick="apagarCategoria('${c.id}')" title="Apagar">🗑️</button>
+        </div>
+      </div>`).join("");
   }
-  el.innerHTML = estado.categorias.map(c => `
-    <div class="cat-row">
-      <div>
-        <div class="cat-nome">${c.nome}</div>
-        <div class="cat-tipo-tag">${c.tipo === "entrada" ? "Entrada" : "Saída"}</div>
-      </div>
-      <div class="cat-acoes">
-        <button type="button" onclick="editarCategoria('${c.id}')" title="Editar">✏️</button>
-        <button type="button" onclick="apagarCategoria('${c.id}')" title="Apagar">🗑️</button>
-      </div>
-    </div>`).join("");
+  renderizarRecorrentes();
 }
 
 document.getElementById("btn-add-categoria").addEventListener("click", ()=>{
@@ -600,13 +1209,12 @@ document.getElementById("btn-add-categoria").addEventListener("click", ()=>{
   const nome = nomeEl.value.trim();
   const tipo = document.getElementById("cfg-cat-tipo").value;
   if(!nome) return;
-  estado.categorias.push({ id: "c"+Date.now(), nome, tipo });
+  estado.categorias.push({ id: gerarId("c"), nome, tipo });
   salvarDados();
   nomeEl.value = "";
-  renderizarConfig();
+  renderizarTudo();
 });
 
-// Edita o nome de uma categoria (o tipo não muda, pra não bagunçar lançamentos já feitos)
 function editarCategoria(id){
   const c = estado.categorias.find(c=>c.id===id);
   if(!c) return;
@@ -614,11 +1222,9 @@ function editarCategoria(id){
   if(novoNome === null || !novoNome.trim()) return;
   c.nome = novoNome.trim();
   salvarDados();
-  renderizarConfig();
+  renderizarTudo();
 }
 
-// Apaga uma categoria. Lançamentos que já usam ela continuam existindo,
-// só deixam de aparecer na lista de opções do formulário.
 function apagarCategoria(id){
   const emUso = estado.transacoes.some(t=>t.categoria===id);
   const aviso = emUso
@@ -626,24 +1232,100 @@ function apagarCategoria(id){
     : "Apagar esta categoria?";
   if(!confirm(aviso)) return;
   estado.categorias = estado.categorias.filter(c=>c.id!==id);
+  estado.orcamentos = estado.orcamentos.filter(o=>o.categoria!==id);
   salvarDados();
-  renderizarConfig();
+  renderizarTudo();
 }
 
 document.getElementById("btn-apagar-tudo").addEventListener("click", ()=>{
-  if(!confirm("Isso vai apagar TODOS os lançamentos e categorias. Não tem como desfazer. Confirma?")) return;
+  if(!confirm("Isso vai apagar TODOS os lançamentos, categorias, orçamentos e metas. Não tem como desfazer. Confirma?")) return;
   localStorage.removeItem(DB_KEY);
-  estado = carregarDados();
+  estado = estadoPadrao();
+  salvarDados();
   cancelarEdicao();
+  aplicarTema();
   renderizarTudo();
 });
 
-/* ---------- 6. PWA: registrar service worker ---------- */
+/* ---------- 13. BACKUP: EXPORTAR / IMPORTAR ---------- */
+function baixarArquivo(conteudo, nomeArquivo, tipo){
+  const blob = new Blob([conteudo], {type: tipo});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nomeArquivo;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("btn-exportar-json").addEventListener("click", ()=>{
+  const hoje = new Date().toISOString().slice(0,10);
+  baixarArquivo(JSON.stringify(estado, null, 2), `backup_minhas_contas_${hoje}.json`, "application/json");
+});
+
+function csvEscape(valor){
+  const s = String(valor).replace(/"/g,'""');
+  return `"${s}"`;
+}
+document.getElementById("btn-exportar-csv").addEventListener("click", ()=>{
+  const linhas = [["Data","Tipo","Descrição","Categoria","Forma de pagamento","Status","Valor"].map(csvEscape).join(",")];
+  [...estado.transacoes].sort((a,b)=> new Date(a.data)-new Date(b.data)).forEach(t=>{
+    linhas.push([
+      t.data, t.tipo==="entrada"?"Entrada":"Saída", t.descricao, nomeCategoria(t.categoria),
+      t.formaPagamento||"", t.status, t.valor.toFixed(2)
+    ].map(csvEscape).join(","));
+  });
+  const hoje = new Date().toISOString().slice(0,10);
+  baixarArquivo(linhas.join("\n"), `lancamentos_${hoje}.csv`, "text/csv");
+});
+
+document.getElementById("input-importar").addEventListener("change", (e)=>{
+  const arquivo = e.target.files[0];
+  if(!arquivo) return;
+  const leitor = new FileReader();
+  leitor.onload = ()=>{
+    try{
+      const dados = JSON.parse(leitor.result);
+      if(!Array.isArray(dados.transacoes) || !Array.isArray(dados.categorias)){
+        alert("Arquivo inválido: não parece ser um backup do Minhas Contas.");
+        return;
+      }
+      if(!confirm("Importar este backup vai substituir todos os dados atuais. Deseja continuar?")) return;
+      estado = normalizarEstado(dados);
+      salvarDados();
+      aplicarTema();
+      cancelarEdicao();
+      renderizarTudo();
+      alert("Backup importado com sucesso!");
+    }catch(err){
+      alert("Não foi possível ler o arquivo. Verifique se é um .json válido.");
+    }
+    e.target.value = "";
+  };
+  leitor.readAsText(arquivo);
+});
+
+/* ---------- 14. RENDERIZAÇÃO GERAL ---------- */
+function renderizarTudo(){
+  renderizarDashboard();
+  renderizarContas();
+  renderizarHistorico();
+  renderizarOrcamentos();
+  renderizarMetas();
+  renderizarEvolucao();
+  renderizarConfig();
+}
+
+/* ---------- 15. PWA: registrar service worker ---------- */
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
 /* ---------- INÍCIO ---------- */
+aplicarTema();
+gerarRecorrentesAteHoje();
 prepararFormulario();
 renderizarTudo();
 </script>
