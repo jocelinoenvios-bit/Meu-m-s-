@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#6E2A49">
+<title>Meu Ciclo</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F6EFF1;
+    --card:#FFFFFF;
+    --ink:#2A1B22;
+    --ink-soft:#8A6E77;
+    --plum:#6E2A49;
+    --plum-light:#9C4770;
+    --gold:#B8842E;
+    --coral:#C44536;
+    --teal:#1C6758;
+    --border:#E7D9DE;
+  }
+  html[data-tema="escuro"]{
+    --bg:#181113;
+    --card:#241820;
+    --ink:#F2E6EA;
+    --ink-soft:#A98D96;
+    --plum:#B15C86;
+    --plum-light:#D687A8;
+    --gold:#E0AE5C;
+    --coral:#E2685A;
+    --teal:#42A585;
+    --border:#3A2530;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Inter', sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    padding-bottom:84px;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .2s, color .2s;
+  }
+  header{ background:var(--plum); color:#fff; padding:22px 20px 26px; }
+  header h1{ font-family:'Fraunces', serif; font-weight:700; font-size:22px; letter-spacing:-0.01em; }
+  header p{ font-size:13px; color:#E8CBDA; margin-top:2px; }
+  main{ padding:16px; max-width:480px; margin:0 auto; }
+  .card{ background:var(--card); border-radius:14px; padding:18px; margin-bottom:14px; border:1px solid var(--border); }
+  .section-title{ font-family:'Fraunces', serif; font-weight:600; font-size:16px; margin:18px 0 10px; display:flex; align-items:center; justify-content:space-between; }
+  .section-title button{ background:var(--plum-light); color:#fff; border:none; border-radius:20px; padding:7px 14px; font-size:13px; font-weight:600; }
+  .empty{ text-align:center; color:var(--ink-soft); font-size:14px; padding:30px 10px; }
+  .hidden{ display:none; }
+
+  /* Meta / pontos */
+  .meta-label{ font-size:13px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
+  .meta-pontos{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:34px; margin-top:4px; }
+  .meta-sub{ font-size:13px; color:var(--ink-soft); margin-top:4px; }
+  .progress-track{ background:var(--border); border-radius:20px; height:10px; overflow:hidden; margin-top:10px; }
+  .progress-fill{ height:100%; border-radius:20px; transition:width .2s; background:var(--teal); }
+  .progress-fill.warn{ background:var(--gold); }
+  .progress-fill.over{ background:var(--plum); }
+  .resumo-row{ display:flex; gap:12px; margin-top:14px; }
+  .resumo-item{ flex:1; }
+  .resumo-item .lbl{ font-size:12px; color:var(--ink-soft); }
+  .resumo-item .val{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:16px; }
+
+  .alerta-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px; cursor:pointer; background:none; border-left:none; border-right:none; border-top:none; width:100%; text-align:left; color:var(--ink); }
+  .alerta-row:last-child{ border-bottom:none; }
+  .alerta-row .badge-num{ background:var(--coral); color:#fff; font-weight:700; border-radius:20px; padding:2px 9px; font-size:12px; }
+
+  .sugestao-item{ padding:10px 0; border-bottom:1px dashed var(--border); }
+  .sugestao-item:last-child{ border-bottom:none; }
+  .sugestao-nome{ font-weight:600; font-size:14px; }
+  .sugestao-detalhe{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+
+  /* Itens genéricos (produto / cliente / venda) */
+  .item{ padding:12px 0; border-bottom:1px solid var(--border); }
+  .item:last-child{ border-bottom:none; }
+  .item-topo{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .item-nome{ font-weight:600; font-size:14px; }
+  .item-sub{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .item-valor{ font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:14px; white-space:nowrap; }
+  .item-acoes{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .item-acoes button{ flex:1; min-width:70px; padding:9px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--ink); font-size:12px; font-weight:600; }
+  .item-acoes button.destaque{ background:var(--teal); color:#fff; border-color:var(--teal); }
+  .item-acoes button.zap{ background:#25D366; color:#fff; border-color:#25D366; }
+  .item-acoes button.perigo{ background:#FBEAE7; color:var(--coral); border-color:#F3C9C2; }
+  html[data-tema="escuro"] .item-acoes button.perigo{ background:#3A2420; border-color:#5A3530; }
+
+  .badge{ display:inline-block; font-size:11px; padding:2px 8px; border-radius:20px; margin-left:6px; font-weight:600; }
+  .badge.vencido{ background:#FBEAE7; color:var(--coral); }
+  .badge.proxima{ background:#F7EAD2; color:var(--gold); }
+  .badge.baixo{ background:#F7EAD2; color:var(--gold); }
+  .badge.esgotado{ background:#FBEAE7; color:var(--coral); }
+  .badge.atraso{ background:#FBEAE7; color:var(--coral); }
+  .badge.limite{ background:#FBEAE7; color:var(--coral); }
+  .badge.ok{ background:#E4F0EA; color:var(--teal); }
+  html[data-tema="escuro"] .badge.vencido{ background:#3A2420; }
+  html[data-tema="escuro"] .badge.proxima{ background:#3A3120; }
+  html[data-tema="escuro"] .badge.baixo{ background:#3A3120; }
+  html[data-tema="escuro"] .badge.esgotado{ background:#3A2420; }
+  html[data-tema="escuro"] .badge.atraso{ background:#3A2420; }
+  html[data-tema="escuro"] .badge.limite{ background:#3A2420; }
+  html[data-tema="escuro"] .badge.ok{ background:#1E3129; }
+
+  /* Formulários */
+  form{ display:flex; flex-direction:column; gap:12px; }
+  label{ font-size:13px; color:var(--ink-soft); font-weight:500; }
+  input, select{ width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--border); font-size:15px; font-family:'Inter', sans-serif; background:var(--bg); color:var(--ink); }
+  .row-2{ display:flex; gap:10px; }
+  .row-2 > *{ flex:1; }
+  .check-row{ display:flex; align-items:center; gap:8px; }
+  .check-row input[type="checkbox"]{ width:auto; accent-color:var(--plum-light); }
+  .check-row label{ margin:0; }
+  .toggle-tipo{ display:flex; gap:8px; }
+  .toggle-tipo button{ flex:1; padding:12px; border-radius:10px; border:1px solid var(--border); background:var(--bg); font-weight:600; font-size:14px; color:var(--ink-soft); }
+  .toggle-tipo button.ativo{ background:var(--plum-light); color:#fff; border-color:var(--plum-light); }
+  .btn-salvar{ background:var(--plum); color:#fff; border:none; padding:14px; border-radius:10px; font-weight:600; font-size:15px; margin-top:4px; }
+  .btn-secundario{ background:var(--bg); border:1px solid var(--border); color:var(--ink); padding:12px; border-radius:10px; font-weight:600; font-size:14px; }
+  .btn-voltar{ background:none; border:none; color:var(--plum-light); font-weight:600; font-size:14px; padding:6px 0; margin-bottom:6px; }
+  .btn-perigo{ background:#FBEAE7; color:var(--coral); border:1px solid #F3C9C2; padding:12px; border-radius:10px; font-weight:600; font-size:14px; width:100%; margin-top:8px; }
+  html[data-tema="escuro"] .btn-perigo{ background:#3A2420; border-color:#5A3530; }
+  .hint{ font-size:12px; color:var(--ink-soft); margin-top:2px; line-height:1.5; }
+  .link-btn{ background:none; border:none; color:var(--plum-light); font-weight:600; font-size:13px; padding:2px 0; text-align:left; }
+
+  /* Switch tema */
+  .switch-row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; }
+  .switch{ position:relative; width:46px; height:26px; flex-shrink:0; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch .slider{ position:absolute; inset:0; background:var(--border); border-radius:20px; cursor:pointer; transition:.2s; }
+  .switch .slider:before{ content:""; position:absolute; width:20px; height:20px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
+  .switch input:checked + .slider{ background:var(--plum-light); }
+  .switch input:checked + .slider:before{ transform:translateX(20px); }
+  .file-label{ display:block; text-align:center; background:var(--bg); border:1px solid var(--border); color:var(--ink); padding:12px; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer; }
+
+  nav{ position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); display:flex; padding:6px 2px calc(6px + env(safe-area-inset-bottom)); }
+  nav button{ flex:1; background:none; border:none; font-size:10px; color:var(--ink-soft); display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 0; font-family:'Inter', sans-serif; }
+  nav button .ic{ font-size:17px; }
+  nav button.ativo{ color:var(--plum-light); font-weight:600; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Meu Ciclo</h1>
+  <p id="header-sub">Estoque, fiado e metas em um só lugar</p>
+</header>
+
+<main>
+
+  <!-- TELA: META / DASHBOARD -->
+  <section id="tela-meta">
+    <div class="card">
+      <div class="meta-label">Pontos no ciclo atual</div>
+      <div class="meta-pontos" id="meta-pontos-valor">0 / 80</div>
+      <div class="meta-sub" id="meta-ciclo-datas">—</div>
+      <div class="progress-track"><div class="progress-fill" id="meta-progress-fill" style="width:0%"></div></div>
+      <div class="meta-sub" id="meta-dias-restantes" style="margin-top:10px; font-weight:600;">—</div>
+      <div class="resumo-row">
+        <div class="resumo-item">
+          <div class="lbl">Lucro no ciclo</div>
+          <div class="val" id="meta-lucro-ciclo" style="color:var(--teal)">R$ 0,00</div>
+        </div>
+        <div class="resumo-item">
+          <div class="lbl">A receber (fiado)</div>
+          <div class="val" id="meta-a-receber" style="color:var(--coral)">R$ 0,00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Sugestão para bater a meta</div>
+    <div class="card" id="card-sugestao">
+      <div class="empty">Cadastre produtos no estoque para receber sugestões</div>
+    </div>
+
+    <div class="section-title">Alertas</div>
+    <div class="card" id="card-alertas">
+      <div class="empty">Nenhum alerta no momento 🎉</div>
+    </div>
+  </section>
+
+  <!-- TELA: ESTOQUE -->
+  <section id="tela-estoque" class="hidden">
+    <div class="section-title">Produtos em estoque <button type="button" id="btn-novo-produto">+ Novo</button></div>
+    <div class="card" id="lista-produtos">
+      <div class="empty">Nenhum produto cadastrado ainda</div>
+    </div>
+  </section>
+
+  <!-- TELA: FORM PRODUTO -->
+  <section id="tela-produto-form" class="hidden">
+    <button type="button" class="btn-voltar" id="btn-voltar-produto">‹ Voltar para o estoque</button>
+    <div class="card">
+      <form id="form-produto">
+        <div>
+          <label>Nome do produto</label>
+          <input type="text" id="p-nome" required placeholder="Ex: Perfume Kaiak 100ml">
+        </div>
+        <div class="row-2">
+          <div>
+            <label>Data de chegada</label>
+            <input type="date" id="p-data-chegada" required>
+          </div>
+          <div>
+            <label>Validade (opcional)</label>
+            <input type="date" id="p-validade">
+          </div>
+        </div>
+        <div class="row-2">
+          <div>
+            <label>Quantidade comprada</label>
+            <input type="number" id="p-quantidade" min="1" step="1" required>
+          </div>
+          <div>
+            <label>Preço de venda (un.)</label>
+            <input type="number" id="p-preco-venda" min="0" step="0.01" required>
+          </div>
+        </div>
+        <div>
+          <label>Valor investido por unidade (sem frete)</label>
+          <input type="number" id="p-custo-unit" min="0" step="0.01" required>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="p-tem-frete">
+          <label for="p-tem-frete">Paguei frete nessa compra</label>
+        </div>
+        <div id="wrap-frete" class="hidden">
+          <label>Valor total do frete (dividido entre as unidades)</label>
+          <input type="number" id="p-frete-total" min="0" step="0.01">
+        </div>
+        <div>
+          <label>Desconto da comissão (%)</label>
+          <input type="number" id="p-comissao-pct" min="0" max="100" step="0.1" value="0">
+        </div>
+        <div>
+          <label>Pontos por unidade</label>
+          <div class="row-2">
+            <input type="number" id="p-pontos-unit" min="0" step="0.01" required>
+            <button type="button" class="btn-secundario" id="btn-sugerir-pontos" style="flex:0 0 auto; white-space:nowrap;">🧮 Sugerir</button>
+          </div>
+          <div class="hint">Ajuste livremente conforme a tabela de pontos da sua marca no ciclo. O botão sugere um valor com base no "valor por ponto" configurado em Config.</div>
+        </div>
+        <div class="card" id="p-preview" style="padding:12px; font-size:13px; color:var(--ink-soft);"></div>
+        <button type="submit" class="btn-salvar" id="btn-salvar-produto">Salvar produto</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- TELA: FORM VENDA -->
+  <section id="tela-venda-form" class="hidden">
+    <button type="button" class="btn-voltar" id="btn-voltar-venda">‹ Voltar</button>
+    <div class="card">
+      <div class="item-nome" id="venda-produto-nome">—</div>
+      <div class="item-sub" id="venda-produto-sub">—</div>
+      <form id="form-venda" style="margin-top:14px;">
+        <div class="toggle-tipo">
+          <button type="button" data-tipo="avista" id="btn-tipo-avista">À vista</button>
+          <button type="button" data-tipo="fiado" id="btn-tipo-fiado">Fiado</button>
+        </div>
+        <div id="wrap-cliente-venda">
+          <label>Cliente</label>
+          <select id="v-cliente"></select>
+          <button type="button" class="link-btn" id="link-novo-cliente-venda">+ cadastrar novo cliente</button>
+        </div>
+        <div class="row-2">
+          <div>
+            <label>Quantidade</label>
+            <input type="number" id="v-quantidade" min="1" step="1" required>
+          </div>
+          <div>
+            <label>Data da venda</label>
+            <input type="date" id="v-data" required>
+          </div>
+        </div>
+        <div>
+          <label>Valor total da venda (R$)</label>
+          <input type="number" id="v-valor-total" min="0" step="0.01" required>
+        </div>
+        <div class="hint" id="v-pontos-preview">—</div>
+        <button type="submit" class="btn-salvar">Registrar venda</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- TELA: FIADO (lista de clientes) -->
+  <section id="tela-fiado" class="hidden">
+    <div class="section-title">Clientes <button type="button" id="btn-novo-cliente">+ Novo</button></div>
+    <div class="card" id="lista-clientes">
+      <div class="empty">Nenhum cliente cadastrado ainda</div>
+    </div>
+  </section>
+
+  <!-- TELA: FORM CLIENTE -->
+  <section id="tela-cliente-form" class="hidden">
+    <button type="button" class="btn-voltar" id="btn-voltar-cliente">‹ Voltar</button>
+    <div class="card">
+      <form id="form-cliente">
+        <div>
+          <label>Nome do cliente</label>
+          <input type="text" id="c-nome" required placeholder="Ex: Maria Souza">
+        </div>
+        <div>
+          <label>WhatsApp (com DDD, só números)</label>
+          <input type="text" id="c-contato" placeholder="Ex: 11999998888" inputmode="numeric">
+        </div>
+        <div>
+          <label>Limite de crédito (R$, 0 = sem limite)</label>
+          <input type="number" id="c-limite" min="0" step="0.01" value="0">
+        </div>
+        <button type="submit" class="btn-salvar">Salvar cliente</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- TELA: DETALHE CLIENTE -->
+  <section id="tela-cliente-detalhe" class="hidden">
+    <button type="button" class="btn-voltar" id="btn-voltar-detalhe">‹ Voltar para clientes</button>
+    <div class="card">
+      <div class="item-topo">
+        <div>
+          <div class="item-nome" id="detalhe-nome">—</div>
+          <div class="item-sub" id="detalhe-contato">—</div>
+        </div>
+        <div class="item-valor" id="detalhe-saldo">R$ 0,00</div>
+      </div>
+      <div class="item-acoes">
+        <button type="button" class="zap" id="btn-cobrar-zap">📲 Cobrar no WhatsApp</button>
+        <button type="button" class="destaque" id="btn-nova-venda-cliente">+ Nova venda fiado</button>
+        <button type="button" id="btn-editar-cliente">✏️ Editar</button>
+        <button type="button" class="perigo" id="btn-excluir-cliente">🗑️ Excluir cliente</button>
+      </div>
+    </div>
+    <div class="section-title">Vendas fiado</div>
+    <div class="card" id="lista-vendas-cliente">
+      <div class="empty">Nenhuma venda fiado registrada</div>
+    </div>
+  </section>
+
+  <!-- TELA: RESUMO -->
+  <section id="tela-resumo" class="hidden">
+    <div class="section-title">Ciclo atual</div>
+    <div class="card">
+      <div class="resumo-row">
+        <div class="resumo-item">
+          <div class="lbl">Lucro realizado</div>
+          <div class="val" id="resumo-lucro" style="color:var(--teal)">R$ 0,00</div>
+        </div>
+        <div class="resumo-item">
+          <div class="lbl">Investido no ciclo</div>
+          <div class="val" id="resumo-investido">R$ 0,00</div>
+        </div>
+      </div>
+      <div class="resumo-row">
+        <div class="resumo-item">
+          <div class="lbl">A receber (todo fiado em aberto)</div>
+          <div class="val" id="resumo-a-receber" style="color:var(--coral)">R$ 0,00</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-title">Histórico de pontos por ciclo</div>
+    <div class="card" id="lista-historico-ciclos">
+      <div class="empty">Ainda não há ciclos anteriores concluídos</div>
+    </div>
+  </section>
+
+  <!-- TELA: CONFIG -->
+  <section id="tela-config" class="hidden">
+    <div class="section-title">Meta e ciclo</div>
+    <div class="card">
+      <form id="form-config-ciclo">
+        <div>
+          <label>Meta de pontos por ciclo</label>
+          <input type="number" id="cfg-meta-pontos" min="1" step="1">
+        </div>
+        <div class="row-2">
+          <div>
+            <label>Duração do ciclo (dias)</label>
+            <input type="number" id="cfg-duracao-ciclo" min="1" step="1">
+          </div>
+          <div>
+            <label>Início do ciclo atual</label>
+            <input type="date" id="cfg-inicio-ciclo">
+          </div>
+        </div>
+        <button type="submit" class="btn-salvar">Salvar</button>
+      </form>
+    </div>
+
+    <div class="section-title">Alertas</div>
+    <div class="card">
+      <form id="form-config-alertas">
+        <div>
+          <label>Avisar validade próxima (dias antes)</label>
+          <input type="number" id="cfg-alerta-validade" min="0" step="1">
+        </div>
+        <div>
+          <label>Avisar estoque baixo (quantidade)</label>
+          <input type="number" id="cfg-estoque-baixo" min="0" step="1">
+        </div>
+        <div>
+          <label>Avisar fiado em aberto há mais de (dias)</label>
+          <input type="number" id="cfg-alerta-fiado" min="0" step="1">
+        </div>
+        <button type="submit" class="btn-salvar">Salvar</button>
+      </form>
+    </div>
+
+    <div class="section-title">Pontuação</div>
+    <div class="card">
+      <form id="form-config-pontos">
+        <div>
+          <label>Valor de referência por ponto (R$, opcional)</label>
+          <input type="number" id="cfg-valor-por-ponto" min="0" step="0.01">
+          <div class="hint">Usado só para sugerir os pontos de um produto novo (valor investido ÷ valor por ponto). Deixe 0 se preferir sempre digitar manualmente.</div>
+        </div>
+        <button type="submit" class="btn-salvar">Salvar</button>
+      </form>
+    </div>
+
+    <div class="section-title">Aparência</div>
+    <div class="card">
+      <div class="switch-row">
+        <span>Modo escuro</span>
+        <label class="switch">
+          <input type="checkbox" id="toggle-tema">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="section-title">Backup dos dados</div>
+    <div class="card">
+      <div class="row-2">
+        <button type="button" class="btn-secundario" id="btn-exportar-json">⬇️ Exportar (.json)</button>
+        <button type="button" class="btn-secundario" id="btn-exportar-csv">⬇️ Vendas (.csv)</button>
+      </div>
+      <label class="file-label" for="input-importar" style="margin-top:10px;">⬆️ Importar backup (.json)</label>
+      <input type="file" id="input-importar" accept="application/json" class="hidden">
+      <div class="hint">Exporte regularmente para não perder seus dados. O .json restaura tudo; o .csv de vendas serve para abrir numa planilha.</div>
+    </div>
+
+    <div class="section-title">Dados</div>
+    <div class="card">
+      <button type="button" class="btn-perigo" id="btn-apagar-tudo">Apagar todos os dados</button>
+    </div>
+  </section>
+
+</main>
+
+<nav>
+  <button data-tela="meta" class="ativo"><span class="ic">🎯</span>Meta</button>
+  <button data-tela="estoque"><span class="ic">📦</span>Estoque</button>
+  <button data-tela="fiado"><span class="ic">💬</span>Fiado</button>
+  <button data-tela="resumo"><span class="ic">📊</span>Resumo</button>
+  <button data-tela="config"><span class="ic">⚙️</span>Config</button>
+</nav>
+
+<script>
+/* =====================================================================
+   1. "BANCO DE DADOS" (localStorage)
+   ===================================================================== */
+const DB_KEY = "meu_ciclo_dados_v1";
+let contadorId = 0;
+function gerarId(prefixo){
+  contadorId++;
+  return prefixo + Date.now() + "_" + contadorId;
+}
+
+function hojeISO(){
+  const d = new Date(); d.setHours(0,0,0,0);
+  return toISO(d);
+}
+function toISO(d){
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function addDias(str, n){
+  const d = new Date(str+"T00:00:00");
+  d.setDate(d.getDate()+n);
+  return toISO(d);
+}
+function diffDias(a, b){
+  return Math.round((new Date(b+"T00:00:00") - new Date(a+"T00:00:00")) / 86400000);
+}
+
+function estadoPadrao(){
+  return {
+    produtos: [],
+    clientes: [],
+    vendas: [],
+    config: {
+      metaPontos: 80,
+      duracaoCiclo: 21,
+      inicioCiclo: hojeISO(),
+      diasAlertaValidade: 30,
+      estoqueBaixo: 3,
+      diasAlertaFiado: 7,
+      valorPorPonto: 0,
+      tema: "claro"
+    }
+  };
+}
+
+function normalizarEstado(obj){
+  const base = estadoPadrao();
+  if(!obj || typeof obj !== "object") return base;
+  const cfgIn = obj.config && typeof obj.config === "object" ? obj.config : {};
+  return {
+    produtos: Array.isArray(obj.produtos) ? obj.produtos : [],
+    clientes: Array.isArray(obj.clientes) ? obj.clientes : [],
+    vendas: Array.isArray(obj.vendas) ? obj.vendas : [],
+    config: {
+      metaPontos: Number(cfgIn.metaPontos) > 0 ? Number(cfgIn.metaPontos) : 80,
+      duracaoCiclo: Number(cfgIn.duracaoCiclo) > 0 ? Number(cfgIn.duracaoCiclo) : 21,
+      inicioCiclo: cfgIn.inicioCiclo || hojeISO(),
+      diasAlertaValidade: Number.isFinite(Number(cfgIn.diasAlertaValidade)) ? Number(cfgIn.diasAlertaValidade) : 30,
+      estoqueBaixo: Number.isFinite(Number(cfgIn.estoqueBaixo)) ? Number(cfgIn.estoqueBaixo) : 3,
+      diasAlertaFiado: Number.isFinite(Number(cfgIn.diasAlertaFiado)) ? Number(cfgIn.diasAlertaFiado) : 7,
+      valorPorPonto: Number(cfgIn.valorPorPonto) || 0,
+      tema: cfgIn.tema === "escuro" ? "escuro" : "claro"
+    }
+  };
+}
+
+function carregarDados(){
+  const bruto = localStorage.getItem(DB_KEY);
+  if(bruto){
+    try{ return normalizarEstado(JSON.parse(bruto)); }
+    catch(e){ return estadoPadrao(); }
+  }
+  return estadoPadrao();
+}
+function salvarDados(){ localStorage.setItem(DB_KEY, JSON.stringify(estado)); }
+
+let estado = carregarDados();
+
+/* =====================================================================
+   2. TEMA
+   ===================================================================== */
+function aplicarTema(){
+  document.documentElement.setAttribute("data-tema", estado.config.tema);
+  document.getElementById("toggle-tema").checked = estado.config.tema === "escuro";
+}
+document.getElementById("toggle-tema").addEventListener("change", (e)=>{
+  estado.config.tema = e.target.checked ? "escuro" : "claro";
+  salvarDados();
+  aplicarTema();
+});
+
+/* =====================================================================
+   3. NAVEGAÇÃO ENTRE TELAS
+   ===================================================================== */
+const TELAS_PRINCIPAIS = ["meta","estoque","fiado","resumo","config"];
+const TODAS_TELAS = [...TELAS_PRINCIPAIS, "produto-form","venda-form","cliente-form","cliente-detalhe"];
+
+function irPara(tela){
+  TODAS_TELAS.forEach(t=>{
+    document.getElementById("tela-"+t).classList.toggle("hidden", t!==tela);
+  });
+  document.querySelectorAll("nav button").forEach(b=>{
+    b.classList.toggle("ativo", b.dataset.tela === tela);
+  });
+  renderizarTudo();
+}
+document.querySelectorAll("nav button").forEach(btn=>{
+  btn.addEventListener("click", ()=> irPara(btn.dataset.tela));
+});
+
+/* =====================================================================
+   4. UTILITÁRIOS
+   ===================================================================== */
+function formatarMoeda(v){
+  return (v||0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+function formatarData(str){
+  if(!str) return "—";
+  return new Date(str+"T00:00:00").toLocaleDateString('pt-BR');
+}
+
+/* =====================================================================
+   5. CÁLCULOS DE PRODUTO (custo, lucro, alertas)
+   ===================================================================== */
+function custoUnitLiquido(p){
+  const freteUnit = p.temFrete ? (Number(p.freteTotal)||0) / (Number(p.quantidadeInicial)||1) : 0;
+  const bruto = (Number(p.custoUnit)||0) + freteUnit;
+  return bruto * (1 - (Number(p.comissaoPct)||0)/100);
+}
+function lucroUnit(p){ return (Number(p.precoVenda)||0) - custoUnitLiquido(p); }
+
+function statusValidade(p){
+  if(!p.validade) return null;
+  const dias = diffDias(hojeISO(), p.validade);
+  if(dias < 0) return {tipo:"vencido", dias: Math.abs(dias)};
+  if(dias <= estado.config.diasAlertaValidade) return {tipo:"proxima", dias};
+  return null;
+}
+function statusEstoque(p){
+  if(p.estoque <= 0) return {tipo:"esgotado"};
+  if(p.estoque <= estado.config.estoqueBaixo) return {tipo:"baixo"};
+  return null;
+}
+
+/* =====================================================================
+   6. CICLOS E PONTOS
+   ===================================================================== */
+function cicloIndiceDeData(dataStr){
+  const dur = estado.config.duracaoCiclo || 21;
+  const d = diffDias(estado.config.inicioCiclo, dataStr);
+  return Math.floor(d / dur);
+}
+function infoCicloAtual(){
+  const dur = estado.config.duracaoCiclo || 21;
+  const hoje = hojeISO();
+  let indice = cicloIndiceDeData(hoje);
+  if(indice < 0) indice = 0;
+  const inicio = addDias(estado.config.inicioCiclo, indice*dur);
+  const fim = addDias(inicio, dur-1);
+  const diasRestantes = Math.max(0, diffDias(hoje, fim) + 1);
+  return {indice, inicio, fim, diasRestantes};
+}
+function pontosDoCiclo(indice){
+  return estado.vendas
+    .filter(v => cicloIndiceDeData(v.data) === indice)
+    .reduce((s,v)=> s + (Number(v.pontosTotal)||0), 0);
+}
+
+/* =====================================================================
+   7. VENDAS: pagamentos, saldo devedor, lucro
+   ===================================================================== */
+function somaPagamentos(v){ return (v.pagamentos||[]).reduce((s,p)=>s+p.valor,0); }
+function vendaQuitada(v){ return somaPagamentos(v) >= v.valorTotal - 0.001; }
+function saldoDevedor(clienteId){
+  return estado.vendas
+    .filter(v=>v.tipo==="fiado" && v.clienteId===clienteId)
+    .reduce((s,v)=> s + Math.max(0, v.valorTotal - somaPagamentos(v)), 0);
+}
+function diasEmAberto(v){
+  if(vendaQuitada(v)) return null;
+  return diffDias(v.data, hojeISO());
+}
+function clienteMaisAtrasado(clienteId){
+  const abertas = estado.vendas.filter(v=>v.tipo==="fiado" && v.clienteId===clienteId && !vendaQuitada(v));
+  if(!abertas.length) return null;
+  return Math.max(...abertas.map(diasEmAberto));
+}
+function lucroTotalVenda(v){
+  const p = estado.produtos.find(pr=>pr.id===v.produtoId);
+  if(!p) return v.valorTotal * 0; // produto removido: não há como recalcular custo
+  const custoTotal = custoUnitLiquido(p) * v.quantidade;
+  return v.valorTotal - custoTotal;
+}
+function lucroRealizadoVenda(v){
+  const total = lucroTotalVenda(v);
+  if(v.tipo === "avista") return total;
+  const frac = v.valorTotal > 0 ? Math.min(1, somaPagamentos(v)/v.valorTotal) : 0;
+  return total * frac;
+}
+function aReceberFiadoTotal(){
+  return estado.vendas
+    .filter(v=>v.tipo==="fiado")
+    .reduce((s,v)=> s + Math.max(0, v.valorTotal - somaPagamentos(v)), 0);
+}
+function resumoCiclo(indice){
+  const vendasCiclo = estado.vendas.filter(v=>cicloIndiceDeData(v.data)===indice);
+  const lucro = vendasCiclo.reduce((s,v)=> s + lucroRealizadoVenda(v), 0);
+  const investido = estado.produtos
+    .filter(p=>cicloIndiceDeData(p.dataChegada)===indice)
+    .reduce((s,p)=> s + custoUnitLiquido(p) * p.quantidadeInicial, 0);
+  return {lucro, investido};
+}
+
+/* =====================================================================
+   8. RENDERIZAÇÃO: TELA META
+   ===================================================================== */
+function renderizarMeta(){
+  const info = infoCicloAtual();
+  const pontos = pontosDoCiclo(info.indice);
+  const meta = estado.config.metaPontos;
+  const pct = meta>0 ? Math.min(100, (pontos/meta)*100) : 0;
+
+  document.getElementById("meta-pontos-valor").textContent = `${pontos.toFixed(pontos%1===0?0:1)} / ${meta} pontos`;
+  document.getElementById("meta-ciclo-datas").textContent = `Ciclo de ${formatarData(info.inicio)} até ${formatarData(info.fim)}`;
+
+  const fill = document.getElementById("meta-progress-fill");
+  fill.style.width = pct + "%";
+  fill.className = "progress-fill " + (pontos>=meta ? "over" : (pct>=60 ? "" : "warn"));
+
+  const diasEl = document.getElementById("meta-dias-restantes");
+  if(pontos >= meta){
+    diasEl.textContent = `🎉 Meta batida! Faltam ${info.diasRestantes} dia(s) para o fim do ciclo.`;
+  } else {
+    diasEl.textContent = `⏳ Faltam ${info.diasRestantes} dia(s) para fechar o ciclo`;
+  }
+
+  const resumo = resumoCiclo(info.indice);
+  document.getElementById("meta-lucro-ciclo").textContent = formatarMoeda(resumo.lucro);
+  document.getElementById("meta-a-receber").textContent = formatarMoeda(aReceberFiadoTotal());
+
+  renderizarSugestao(info, pontos, meta);
+  renderizarAlertasMeta();
+}
+
+function renderizarSugestao(info, pontos, meta){
+  const el = document.getElementById("card-sugestao");
+  const faltam = meta - pontos;
+  const disponiveis = estado.produtos.filter(p=>p.estoque>0 && (Number(p.pontosUnit)||0) > 0);
+
+  if(faltam <= 0){
+    el.innerHTML = `<div class="empty">🎉 Você já bateu a meta de pontos deste ciclo!</div>`;
+    return;
+  }
+  if(!disponiveis.length){
+    el.innerHTML = `<div class="empty">Ainda faltam ${faltam.toFixed(faltam%1===0?0:1)} pontos. Cadastre produtos com pontos definidos para receber sugestões.</div>`;
+    return;
+  }
+  const ranking = [...disponiveis].sort((a,b)=>{
+    if(b.pontosUnit !== a.pontosUnit) return b.pontosUnit - a.pontosUnit;
+    return lucroUnit(b) - lucroUnit(a);
+  }).slice(0,5);
+
+  el.innerHTML = `<div class="hint" style="margin-bottom:8px;">Faltam <strong>${faltam.toFixed(faltam%1===0?0:1)} pontos</strong>${info.diasRestantes<=7 ? " e o ciclo fecha em breve" : ""}. Priorize vender:</div>` +
+    ranking.map(p=>{
+      const unidades = Math.min(p.estoque, Math.max(1, Math.ceil(faltam / p.pontosUnit)));
+      const pontosGerados = unidades * p.pontosUnit;
+      const lucroGerado = unidades * lucroUnit(p);
+      return `
+        <div class="sugestao-item">
+          <div class="sugestao-nome">${p.nome}</div>
+          <div class="sugestao-detalhe">Vender ${unidades} un. → +${pontosGerados.toFixed(pontosGerados%1===0?0:1)} pts · lucro de ${formatarMoeda(lucroGerado)} · estoque atual: ${p.estoque}</div>
+        </div>`;
+    }).join("");
+}
+
+function renderizarAlertasMeta(){
+  const el = document.getElementById("card-alertas");
+  const validadeCount = estado.produtos.filter(p=>{
+    const s = statusValidade(p);
+    return s && p.estoque>0;
+  }).length;
+  const estoqueBaixoCount = estado.produtos.filter(p=>{
+    const s = statusEstoque(p);
+    return s;
+  }).length;
+  const fiadoAtrasoCount = estado.clientes.filter(c=>{
+    const d = clienteMaisAtrasado(c.id);
+    return d !== null && d > estado.config.diasAlertaFiado;
+  }).length;
+
+  const linhas = [];
+  if(validadeCount) linhas.push(`<button type="button" class="alerta-row" onclick="irPara('estoque')">⏰ Produtos com validade próxima ou vencida <span class="badge-num">${validadeCount}</span></button>`);
+  if(estoqueBaixoCount) linhas.push(`<button type="button" class="alerta-row" onclick="irPara('estoque')">📉 Produtos com estoque baixo/esgotado <span class="badge-num">${estoqueBaixoCount}</span></button>`);
+  if(fiadoAtrasoCount) linhas.push(`<button type="button" class="alerta-row" onclick="irPara('fiado')">⚠️ Clientes com fiado em atraso <span class="badge-num">${fiadoAtrasoCount}</span></button>`);
+
+  el.innerHTML = linhas.length ? linhas.join("") : `<div class="empty">Nenhum alerta no momento 🎉</div>`;
+}
+
+/* =====================================================================
+   9. RENDERIZAÇÃO: ESTOQUE
+   ===================================================================== */
+function renderizarEstoque(){
+  const el = document.getElementById("lista-produtos");
+  if(!estado.produtos.length){
+    el.innerHTML = `<div class="empty">Nenhum produto cadastrado ainda</div>`;
+    return;
+  }
+  const lista = [...estado.produtos].sort((a,b)=> new Date(b.dataChegada) - new Date(a.dataChegada));
+  el.innerHTML = lista.map(p=>{
+    const sv = statusValidade(p);
+    const se = statusEstoque(p);
+    let badges = "";
+    if(sv) badges += sv.tipo === "vencido" ? `<span class="badge vencido">vencido há ${sv.dias}d</span>` : `<span class="badge proxima">vence em ${sv.dias}d</span>`;
+    if(se) badges += se.tipo === "esgotado" ? `<span class="badge esgotado">esgotado</span>` : `<span class="badge baixo">estoque baixo</span>`;
+    return `
+      <div class="item">
+        <div class="item-topo">
+          <div>
+            <div class="item-nome">${p.nome} ${badges}</div>
+            <div class="item-sub">Chegou em ${formatarData(p.dataChegada)} · estoque: ${p.estoque} un. · ${p.pontosUnit} pts/un.</div>
+            <div class="item-sub">Venda ${formatarMoeda(p.precoVenda)} · lucro/un. ${formatarMoeda(lucroUnit(p))}</div>
+          </div>
+        </div>
+        <div class="item-acoes">
+          <button type="button" class="destaque" ${p.estoque<=0?"disabled":""} onclick="abrirVenda('${p.id}')">💰 Vender</button>
+          <button type="button" onclick="editarProduto('${p.id}')">✏️ Editar</button>
+          <button type="button" onclick="ajustarEstoque('${p.id}')">🔧 Ajustar</button>
+          <button type="button" class="perigo" onclick="apagarProduto('${p.id}')">🗑️ Excluir</button>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+let editandoProdutoId = null;
+
+document.getElementById("btn-novo-produto").addEventListener("click", ()=>{
+  editandoProdutoId = null;
+  document.getElementById("form-produto").reset();
+  document.getElementById("p-data-chegada").valueAsDate = new Date();
+  document.getElementById("p-comissao-pct").value = 0;
+  document.getElementById("wrap-frete").classList.add("hidden");
+  document.getElementById("p-quantidade").disabled = false;
+  document.getElementById("btn-salvar-produto").textContent = "Salvar produto";
+  atualizarPreviewProduto();
+  irPara("produto-form");
+});
+document.getElementById("btn-voltar-produto").addEventListener("click", ()=> irPara("estoque"));
+
+function editarProduto(id){
+  const p = estado.produtos.find(p=>p.id===id);
+  if(!p) return;
+  editandoProdutoId = id;
+  document.getElementById("p-nome").value = p.nome;
+  document.getElementById("p-data-chegada").value = p.dataChegada;
+  document.getElementById("p-validade").value = p.validade || "";
+  document.getElementById("p-quantidade").value = p.quantidadeInicial;
+  document.getElementById("p-quantidade").disabled = true;
+  document.getElementById("p-preco-venda").value = p.precoVenda;
+  document.getElementById("p-custo-unit").value = p.custoUnit;
+  document.getElementById("p-tem-frete").checked = p.temFrete;
+  document.getElementById("wrap-frete").classList.toggle("hidden", !p.temFrete);
+  document.getElementById("p-frete-total").value = p.freteTotal || "";
+  document.getElementById("p-comissao-pct").value = p.comissaoPct || 0;
+  document.getElementById("p-pontos-unit").value = p.pontosUnit;
+  document.getElementById("btn-salvar-produto").textContent = "Salvar alterações";
+  atualizarPreviewProduto();
+  irPara("produto-form");
+}
+
+function ajustarEstoque(id){
+  const p = estado.produtos.find(p=>p.id===id);
+  if(!p) return;
+  const txt = prompt(`Corrigir estoque de "${p.nome}" (ex: perda, brinde, contagem física). Quantidade atual: ${p.estoque}`, p.estoque);
+  if(txt===null) return;
+  const novo = parseInt(txt,10);
+  if(!Number.isFinite(novo) || novo<0){ alert("Informe uma quantidade válida."); return; }
+  p.estoque = novo;
+  salvarDados();
+  renderizarTudo();
+}
+
+function apagarProduto(id){
+  if(!confirm("Excluir este produto do estoque? As vendas já registradas continuam no histórico.")) return;
+  estado.produtos = estado.produtos.filter(p=>p.id!==id);
+  salvarDados();
+  renderizarTudo();
+}
+
+document.getElementById("p-tem-frete").addEventListener("change", (e)=>{
+  document.getElementById("wrap-frete").classList.toggle("hidden", !e.target.checked);
+  atualizarPreviewProduto();
+});
+["p-custo-unit","p-frete-total","p-comissao-pct","p-preco-venda","p-quantidade"].forEach(id=>{
+  document.getElementById(id).addEventListener("input", atualizarPreviewProduto);
+});
+
+function atualizarPreviewProduto(){
+  const custoUnit = parseFloat(document.getElementById("p-custo-unit").value) || 0;
+  const temFrete = document.getElementById("p-tem-frete").checked;
+  const freteTotal = parseFloat(document.getElementById("p-frete-total").value) || 0;
+  const quantidade = parseFloat(document.getElementById("p-quantidade").value) || 1;
+  const comissaoPct = parseFloat(document.getElementById("p-comissao-pct").value) || 0;
+  const precoVenda = parseFloat(document.getElementById("p-preco-venda").value) || 0;
+  const custoFake = custoUnitLiquido({custoUnit, temFrete, freteTotal, quantidadeInicial: quantidade, comissaoPct});
+  const lucro = precoVenda - custoFake;
+  document.getElementById("p-preview").innerHTML =
+    `Custo líquido por unidade: <strong>${formatarMoeda(custoFake)}</strong><br>Lucro estimado por unidade: <strong>${formatarMoeda(lucro)}</strong>`;
+}
+
+document.getElementById("btn-sugerir-pontos").addEventListener("click", ()=>{
+  const valorPorPonto = estado.config.valorPorPonto;
+  if(!valorPorPonto || valorPorPonto<=0){
+    alert("Defina um 'valor de referência por ponto' na tela Config primeiro.");
+    return;
+  }
+  const custoUnit = parseFloat(document.getElementById("p-custo-unit").value) || 0;
+  document.getElementById("p-pontos-unit").value = Math.round((custoUnit / valorPorPonto) * 100) / 100;
+});
+
+document.getElementById("form-produto").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const temFrete = document.getElementById("p-tem-frete").checked;
+  if(editandoProdutoId){
+    const p = estado.produtos.find(p=>p.id===editandoProdutoId);
+    p.nome = document.getElementById("p-nome").value;
+    p.dataChegada = document.getElementById("p-data-chegada").value;
+    p.validade = document.getElementById("p-validade").value || "";
+    p.precoVenda = parseFloat(document.getElementById("p-preco-venda").value);
+    p.custoUnit = parseFloat(document.getElementById("p-custo-unit").value);
+    p.temFrete = temFrete;
+    p.freteTotal = temFrete ? (parseFloat(document.getElementById("p-frete-total").value)||0) : 0;
+    p.comissaoPct = parseFloat(document.getElementById("p-comissao-pct").value) || 0;
+    p.pontosUnit = parseFloat(document.getElementById("p-pontos-unit").value);
+  } else {
+    const quantidade = parseInt(document.getElementById("p-quantidade").value, 10);
+    estado.produtos.push({
+      id: gerarId("p"),
+      nome: document.getElementById("p-nome").value,
+      dataChegada: document.getElementById("p-data-chegada").value,
+      validade: document.getElementById("p-validade").value || "",
+      quantidadeInicial: quantidade,
+      estoque: quantidade,
+      precoVenda: parseFloat(document.getElementById("p-preco-venda").value),
+      custoUnit: parseFloat(document.getElementById("p-custo-unit").value),
+      temFrete: temFrete,
+      freteTotal: temFrete ? (parseFloat(document.getElementById("p-frete-total").value)||0) : 0,
+      comissaoPct: parseFloat(document.getElementById("p-comissao-pct").value) || 0,
+      pontosUnit: parseFloat(document.getElementById("p-pontos-unit").value)
+    });
+  }
+  salvarDados();
+  irPara("estoque");
+});
+
+/* =====================================================================
+   10. RENDERIZAÇÃO: FORM DE VENDA
+   ===================================================================== */
+let vendaContexto = { produtoId: null, clienteFixo: null };
+let proximoClienteParaVenda = null;
+
+function popularSelectClientes(selectId, selecionadoId){
+  const select = document.getElementById(selectId);
+  select.innerHTML = estado.clientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join("");
+  if(selecionadoId) select.value = selecionadoId;
+}
+
+function abrirVenda(produtoId, clienteFixoId){
+  const p = estado.produtos.find(p=>p.id===produtoId);
+  if(!p) return;
+  if(!clienteFixoId && proximoClienteParaVenda){
+    clienteFixoId = proximoClienteParaVenda;
+    proximoClienteParaVenda = null;
+  }
+  vendaContexto = { produtoId, clienteFixo: clienteFixoId || null };
+  document.getElementById("venda-produto-nome").textContent = p.nome;
+  document.getElementById("venda-produto-sub").textContent = `Estoque disponível: ${p.estoque} un. · ${formatarMoeda(p.precoVenda)}/un. · ${p.pontosUnit} pts/un.`;
+  document.getElementById("form-venda").reset();
+  document.getElementById("v-data").valueAsDate = new Date();
+  document.getElementById("v-quantidade").max = p.estoque;
+  document.getElementById("v-quantidade").value = 1;
+
+  if(!estado.clientes.length){
+    document.getElementById("wrap-cliente-venda").querySelector("select").innerHTML = "";
+  } else {
+    popularSelectClientes("v-cliente", clienteFixoId);
+  }
+  selecionarTipoVenda(clienteFixoId ? "fiado" : "avista");
+  atualizarPreviewVenda();
+  irPara("venda-form");
+}
+document.getElementById("btn-voltar-venda").addEventListener("click", ()=>{
+  irPara(vendaContexto.clienteFixo ? "cliente-detalhe" : "estoque");
+});
+
+let tipoVendaSelecionado = "avista";
+function selecionarTipoVenda(tipo){
+  tipoVendaSelecionado = tipo;
+  document.getElementById("btn-tipo-avista").classList.toggle("ativo", tipo==="avista");
+  document.getElementById("btn-tipo-fiado").classList.toggle("ativo", tipo==="fiado");
+  document.getElementById("wrap-cliente-venda").classList.toggle("hidden", tipo!=="fiado");
+}
+document.getElementById("btn-tipo-avista").addEventListener("click", ()=>selecionarTipoVenda("avista"));
+document.getElementById("btn-tipo-fiado").addEventListener("click", ()=>selecionarTipoVenda("fiado"));
+document.getElementById("link-novo-cliente-venda").addEventListener("click", ()=>{
+  editandoClienteId = null;
+  origemFormCliente = "venda";
+  document.getElementById("form-cliente").reset();
+  document.getElementById("c-limite").value = 0;
+  irPara("cliente-form");
+});
+
+["v-quantidade"].forEach(id=> document.getElementById(id).addEventListener("input", atualizarPreviewVenda));
+function atualizarPreviewVenda(){
+  const p = estado.produtos.find(p=>p.id===vendaContexto.produtoId);
+  if(!p) return;
+  const qtd = parseInt(document.getElementById("v-quantidade").value,10) || 0;
+  document.getElementById("v-valor-total").value = (qtd * p.precoVenda).toFixed(2);
+  const pontos = qtd * (Number(p.pontosUnit)||0);
+  document.getElementById("v-pontos-preview").textContent = `Essa venda vai gerar ${pontos.toFixed(pontos%1===0?0:1)} pontos no ciclo.`;
+}
+
+document.getElementById("form-venda").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const p = estado.produtos.find(p=>p.id===vendaContexto.produtoId);
+  if(!p) return;
+  const quantidade = parseInt(document.getElementById("v-quantidade").value,10);
+  if(quantidade > p.estoque){
+    alert(`Estoque insuficiente. Disponível: ${p.estoque} un.`);
+    return;
+  }
+  const valorTotal = parseFloat(document.getElementById("v-valor-total").value);
+  const data = document.getElementById("v-data").value;
+  const tipo = tipoVendaSelecionado;
+  let clienteId = null;
+
+  if(tipo === "fiado"){
+    if(!estado.clientes.length){
+      alert("Cadastre um cliente antes de registrar uma venda fiado.");
+      return;
+    }
+    clienteId = document.getElementById("v-cliente").value;
+    const cliente = estado.clientes.find(c=>c.id===clienteId);
+    if(cliente.limiteCredito > 0){
+      const novoSaldo = saldoDevedor(clienteId) + valorTotal;
+      if(novoSaldo > cliente.limiteCredito){
+        const seguir = confirm(`Atenção: ${cliente.nome} vai ultrapassar o limite de crédito (limite ${formatarMoeda(cliente.limiteCredito)}, ficaria devendo ${formatarMoeda(novoSaldo)}). Registrar mesmo assim?`);
+        if(!seguir) return;
+      }
+    }
+  }
+
+  p.estoque -= quantidade;
+  estado.vendas.push({
+    id: gerarId("v"),
+    tipo, produtoId: p.id, clienteId,
+    quantidade, valorTotal, data,
+    pontosTotal: quantidade * (Number(p.pontosUnit)||0),
+    pagamentos: tipo==="avista" ? [{data, valor: valorTotal}] : []
+  });
+  salvarDados();
+  irPara(tipo==="fiado" && clienteId ? "cliente-detalhe" : "estoque");
+  if(tipo==="fiado" && clienteId) abrirDetalheCliente(clienteId);
+});
+
+/* =====================================================================
+   11. RENDERIZAÇÃO: FIADO (clientes)
+   ===================================================================== */
+function renderizarFiado(){
+  const el = document.getElementById("lista-clientes");
+  if(!estado.clientes.length){
+    el.innerHTML = `<div class="empty">Nenhum cliente cadastrado ainda</div>`;
+    return;
+  }
+  const lista = [...estado.clientes].sort((a,b)=> saldoDevedor(b.id) - saldoDevedor(a.id));
+  el.innerHTML = lista.map(c=>{
+    const saldo = saldoDevedor(c.id);
+    const atraso = clienteMaisAtrasado(c.id);
+    let badges = "";
+    if(atraso !== null && atraso > estado.config.diasAlertaFiado) badges += `<span class="badge atraso">devendo há ${atraso}d</span>`;
+    if(c.limiteCredito>0 && saldo > c.limiteCredito) badges += `<span class="badge limite">acima do limite</span>`;
+    return `
+      <div class="item" style="cursor:pointer;" onclick="abrirDetalheCliente('${c.id}')">
+        <div class="item-topo">
+          <div>
+            <div class="item-nome">${c.nome} ${badges}</div>
+            <div class="item-sub">${c.contato ? "📱 "+c.contato : "sem contato cadastrado"}</div>
+          </div>
+          <div class="item-valor" style="color:${saldo>0?'var(--coral)':'var(--teal)'}">${formatarMoeda(saldo)}</div>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+let editandoClienteId = null;
+let origemFormCliente = "lista"; // "lista" | "detalhe" | "venda"
+document.getElementById("btn-novo-cliente").addEventListener("click", ()=>{
+  editandoClienteId = null;
+  origemFormCliente = "lista";
+  document.getElementById("form-cliente").reset();
+  document.getElementById("c-limite").value = 0;
+  irPara("cliente-form");
+});
+document.getElementById("btn-voltar-cliente").addEventListener("click", ()=>{
+  if(origemFormCliente==="venda") irPara("venda-form");
+  else if(origemFormCliente==="detalhe") irPara("cliente-detalhe");
+  else irPara("fiado");
+});
+
+document.getElementById("form-cliente").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const nome = document.getElementById("c-nome").value;
+  const contato = document.getElementById("c-contato").value.replace(/\D/g,"");
+  const limiteCredito = parseFloat(document.getElementById("c-limite").value) || 0;
+  let novoId = editandoClienteId;
+  if(editandoClienteId){
+    const c = estado.clientes.find(c=>c.id===editandoClienteId);
+    c.nome = nome; c.contato = contato; c.limiteCredito = limiteCredito;
+  } else {
+    novoId = gerarId("c");
+    estado.clientes.push({ id: novoId, nome, contato, limiteCredito });
+  }
+  salvarDados();
+  if(origemFormCliente === "venda"){
+    irPara("venda-form");
+    popularSelectClientes("v-cliente", novoId);
+    selecionarTipoVenda("fiado");
+  } else if(origemFormCliente === "detalhe" || editandoClienteId){
+    abrirDetalheCliente(novoId);
+  } else {
+    irPara("fiado");
+  }
+});
+
+/* =====================================================================
+   12. RENDERIZAÇÃO: DETALHE DO CLIENTE
+   ===================================================================== */
+let clienteDetalheAtual = null;
+
+function abrirDetalheCliente(clienteId){
+  clienteDetalheAtual = clienteId;
+  irPara("cliente-detalhe");
+}
+
+function renderizarDetalheCliente(){
+  if(!clienteDetalheAtual) return;
+  const c = estado.clientes.find(c=>c.id===clienteDetalheAtual);
+  if(!c){ clienteDetalheAtual = null; irPara("fiado"); return; }
+
+  document.getElementById("detalhe-nome").textContent = c.nome;
+  document.getElementById("detalhe-contato").textContent = c.contato ? "📱 "+c.contato : "sem contato cadastrado";
+  const saldo = saldoDevedor(c.id);
+  const elSaldo = document.getElementById("detalhe-saldo");
+  elSaldo.textContent = formatarMoeda(saldo);
+  elSaldo.style.color = saldo>0 ? "var(--coral)" : "var(--teal)";
+  document.getElementById("btn-cobrar-zap").classList.toggle("hidden", saldo<=0);
+
+  const vendas = estado.vendas.filter(v=>v.tipo==="fiado" && v.clienteId===c.id)
+    .sort((a,b)=> new Date(b.data) - new Date(a.data));
+  const el = document.getElementById("lista-vendas-cliente");
+  if(!vendas.length){
+    el.innerHTML = `<div class="empty">Nenhuma venda fiado registrada</div>`;
+  } else {
+    el.innerHTML = vendas.map(v=>{
+      const p = estado.produtos.find(p=>p.id===v.produtoId);
+      const pago = somaPagamentos(v);
+      const restante = Math.max(0, v.valorTotal - pago);
+      const quitada = vendaQuitada(v);
+      const dias = diasEmAberto(v);
+      return `
+        <div class="item">
+          <div class="item-topo">
+            <div>
+              <div class="item-nome">${p ? p.nome : "(produto removido)"} ${quitada ? '<span class="badge ok">quitada</span>' : (dias>estado.config.diasAlertaFiado ? `<span class="badge atraso">${dias}d em aberto</span>` : "")}</div>
+              <div class="item-sub">${formatarData(v.data)} · ${v.quantidade} un. · total ${formatarMoeda(v.valorTotal)}</div>
+              ${!quitada ? `<div class="item-sub">pago: ${formatarMoeda(pago)} · falta: ${formatarMoeda(restante)}</div>` : ""}
+            </div>
+          </div>
+          <div class="item-acoes">
+            ${!quitada ? `<button type="button" class="destaque" onclick="registrarPagamento('${v.id}')">💵 Registrar pagamento</button>` : ""}
+            <button type="button" class="perigo" onclick="apagarVenda('${v.id}')">🗑️ Excluir</button>
+          </div>
+        </div>`;
+    }).join("");
+  }
+}
+
+document.getElementById("btn-nova-venda-cliente").addEventListener("click", ()=>{
+  if(!estado.produtos.some(p=>p.estoque>0)){
+    alert("Não há produtos com estoque disponível para vender.");
+    return;
+  }
+  proximoClienteParaVenda = clienteDetalheAtual;
+  alert("Escolha o produto na aba Estoque e toque em Vender — este cliente já estará pré-selecionado.");
+  irPara("estoque");
+});
+document.getElementById("btn-editar-cliente").addEventListener("click", ()=>{
+  const c = estado.clientes.find(c=>c.id===clienteDetalheAtual);
+  if(!c) return;
+  editandoClienteId = c.id;
+  origemFormCliente = "detalhe";
+  document.getElementById("c-nome").value = c.nome;
+  document.getElementById("c-contato").value = c.contato;
+  document.getElementById("c-limite").value = c.limiteCredito;
+  irPara("cliente-form");
+});
+document.getElementById("btn-excluir-cliente").addEventListener("click", ()=>{
+  if(!confirm("Excluir este cliente? As vendas fiado associadas continuam no histórico, mas sem cliente vinculado.")) return;
+  estado.clientes = estado.clientes.filter(c=>c.id!==clienteDetalheAtual);
+  salvarDados();
+  clienteDetalheAtual = null;
+  irPara("fiado");
+});
+document.getElementById("btn-cobrar-zap").addEventListener("click", ()=>{
+  const c = estado.clientes.find(c=>c.id===clienteDetalheAtual);
+  if(!c || !c.contato){ alert("Cadastre o WhatsApp deste cliente para usar a cobrança automática."); return; }
+  const saldo = saldoDevedor(c.id);
+  const msg = `Olá ${c.nome}! Passando para lembrar do valor pendente de ${formatarMoeda(saldo)}. Pode me confirmar o pagamento? 😊`;
+  const numero = c.contato.length <= 11 ? "55"+c.contato : c.contato;
+  window.open(`https://wa.me/${numero}?text=${encodeURIComponent(msg)}`, "_blank");
+});
+
+function registrarPagamento(vendaId){
+  const v = estado.vendas.find(v=>v.id===vendaId);
+  if(!v) return;
+  const restante = v.valorTotal - somaPagamentos(v);
+  const txt = prompt(`Quanto foi pago? (falta ${formatarMoeda(restante)})`, restante.toFixed(2));
+  if(txt===null) return;
+  const valor = parseFloat(txt);
+  if(!valor || valor<=0) return;
+  v.pagamentos = v.pagamentos || [];
+  v.pagamentos.push({ data: hojeISO(), valor: Math.min(valor, restante) });
+  salvarDados();
+  renderizarTudo();
+}
+function apagarVenda(vendaId){
+  if(!confirm("Excluir esta venda? O estoque do produto será devolvido.")) return;
+  const v = estado.vendas.find(v=>v.id===vendaId);
+  if(!v) return;
+  const p = estado.produtos.find(p=>p.id===v.produtoId);
+  if(p) p.estoque += v.quantidade;
+  estado.vendas = estado.vendas.filter(x=>x.id!==vendaId);
+  salvarDados();
+  renderizarTudo();
+}
+
+/* =====================================================================
+   13. RENDERIZAÇÃO: RESUMO
+   ===================================================================== */
+function renderizarResumo(){
+  const info = infoCicloAtual();
+  const r = resumoCiclo(info.indice);
+  document.getElementById("resumo-lucro").textContent = formatarMoeda(r.lucro);
+  document.getElementById("resumo-investido").textContent = formatarMoeda(r.investido);
+  document.getElementById("resumo-a-receber").textContent = formatarMoeda(aReceberFiadoTotal());
+
+  const indices = new Set();
+  estado.vendas.forEach(v=> indices.add(cicloIndiceDeData(v.data)));
+  estado.produtos.forEach(p=> indices.add(cicloIndiceDeData(p.dataChegada)));
+  const anteriores = [...indices].filter(i=> i < info.indice).sort((a,b)=>b-a);
+
+  const el = document.getElementById("lista-historico-ciclos");
+  if(!anteriores.length){
+    el.innerHTML = `<div class="empty">Ainda não há ciclos anteriores concluídos</div>`;
+    return;
+  }
+  const dur = estado.config.duracaoCiclo;
+  el.innerHTML = anteriores.map(idx=>{
+    const inicio = addDias(estado.config.inicioCiclo, idx*dur);
+    const fim = addDias(inicio, dur-1);
+    const pontos = pontosDoCiclo(idx);
+    const bateu = pontos >= estado.config.metaPontos;
+    return `
+      <div class="item">
+        <div class="item-topo">
+          <div>
+            <div class="item-nome">${formatarData(inicio)} a ${formatarData(fim)}</div>
+            <div class="item-sub">${pontos.toFixed(pontos%1===0?0:1)} / ${estado.config.metaPontos} pontos</div>
+          </div>
+          <div class="badge ${bateu?'ok':'atraso'}">${bateu?'meta batida':'não bateu'}</div>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+/* =====================================================================
+   14. RENDERIZAÇÃO: CONFIG
+   ===================================================================== */
+function renderizarConfig(){
+  document.getElementById("cfg-meta-pontos").value = estado.config.metaPontos;
+  document.getElementById("cfg-duracao-ciclo").value = estado.config.duracaoCiclo;
+  document.getElementById("cfg-inicio-ciclo").value = estado.config.inicioCiclo;
+  document.getElementById("cfg-alerta-validade").value = estado.config.diasAlertaValidade;
+  document.getElementById("cfg-estoque-baixo").value = estado.config.estoqueBaixo;
+  document.getElementById("cfg-alerta-fiado").value = estado.config.diasAlertaFiado;
+  document.getElementById("cfg-valor-por-ponto").value = estado.config.valorPorPonto;
+}
+
+document.getElementById("form-config-ciclo").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  estado.config.metaPontos = parseFloat(document.getElementById("cfg-meta-pontos").value) || 80;
+  estado.config.duracaoCiclo = parseInt(document.getElementById("cfg-duracao-ciclo").value,10) || 21;
+  estado.config.inicioCiclo = document.getElementById("cfg-inicio-ciclo").value || hojeISO();
+  salvarDados();
+  renderizarTudo();
+  alert("Configurações de ciclo salvas!");
+});
+document.getElementById("form-config-alertas").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  estado.config.diasAlertaValidade = parseInt(document.getElementById("cfg-alerta-validade").value,10) || 0;
+  estado.config.estoqueBaixo = parseInt(document.getElementById("cfg-estoque-baixo").value,10) || 0;
+  estado.config.diasAlertaFiado = parseInt(document.getElementById("cfg-alerta-fiado").value,10) || 0;
+  salvarDados();
+  renderizarTudo();
+  alert("Alertas salvos!");
+});
+document.getElementById("form-config-pontos").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  estado.config.valorPorPonto = parseFloat(document.getElementById("cfg-valor-por-ponto").value) || 0;
+  salvarDados();
+  alert("Configuração de pontos salva!");
+});
+
+document.getElementById("btn-apagar-tudo").addEventListener("click", ()=>{
+  if(!confirm("Isso vai apagar TODOS os produtos, clientes, vendas e configurações. Não tem como desfazer. Confirma?")) return;
+  localStorage.removeItem(DB_KEY);
+  estado = estadoPadrao();
+  salvarDados();
+  aplicarTema();
+  clienteDetalheAtual = null;
+  irPara("meta");
+});
+
+/* =====================================================================
+   15. BACKUP: EXPORTAR / IMPORTAR
+   ===================================================================== */
+function baixarArquivo(conteudo, nomeArquivo, tipo){
+  const blob = new Blob([conteudo], {type: tipo});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = nomeArquivo;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+document.getElementById("btn-exportar-json").addEventListener("click", ()=>{
+  const hoje = new Date().toISOString().slice(0,10);
+  baixarArquivo(JSON.stringify(estado, null, 2), `backup_meu_ciclo_${hoje}.json`, "application/json");
+});
+function csvEscape(v){ return `"${String(v).replace(/"/g,'""')}"`; }
+document.getElementById("btn-exportar-csv").addEventListener("click", ()=>{
+  const linhas = [["Data","Tipo","Produto","Cliente","Quantidade","Valor total","Pago","Pontos"].map(csvEscape).join(",")];
+  [...estado.vendas].sort((a,b)=> new Date(a.data)-new Date(b.data)).forEach(v=>{
+    const p = estado.produtos.find(p=>p.id===v.produtoId);
+    const c = estado.clientes.find(c=>c.id===v.clienteId);
+    linhas.push([
+      v.data, v.tipo==="avista"?"À vista":"Fiado", p?p.nome:"(removido)", c?c.nome:"",
+      v.quantidade, v.valorTotal.toFixed(2), somaPagamentos(v).toFixed(2), v.pontosTotal
+    ].map(csvEscape).join(","));
+  });
+  const hoje = new Date().toISOString().slice(0,10);
+  baixarArquivo(linhas.join("\n"), `vendas_${hoje}.csv`, "text/csv");
+});
+document.getElementById("input-importar").addEventListener("change", (e)=>{
+  const arquivo = e.target.files[0];
+  if(!arquivo) return;
+  const leitor = new FileReader();
+  leitor.onload = ()=>{
+    try{
+      const dados = JSON.parse(leitor.result);
+      if(!Array.isArray(dados.produtos) || !Array.isArray(dados.clientes) || !Array.isArray(dados.vendas)){
+        alert("Arquivo inválido: não parece ser um backup do Meu Ciclo.");
+        return;
+      }
+      if(!confirm("Importar este backup vai substituir todos os dados atuais. Deseja continuar?")) return;
+      estado = normalizarEstado(dados);
+      salvarDados();
+      aplicarTema();
+      clienteDetalheAtual = null;
+      irPara("meta");
+      alert("Backup importado com sucesso!");
+    }catch(err){
+      alert("Não foi possível ler o arquivo. Verifique se é um .json válido.");
+    }
+    e.target.value = "";
+  };
+  leitor.readAsText(arquivo);
+});
+
+/* =====================================================================
+   16. RENDERIZAÇÃO GERAL
+   ===================================================================== */
+function renderizarTudo(){
+  renderizarMeta();
+  renderizarEstoque();
+  renderizarFiado();
+  renderizarDetalheCliente();
+  renderizarResumo();
+  renderizarConfig();
+}
+
+/* =====================================================================
+   17. PWA: registrar service worker
+   ===================================================================== */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+/* =====================================================================
+   INÍCIO
+   ===================================================================== */
+aplicarTema();
+renderizarTudo();
+</script>
+</body>
+</html>
