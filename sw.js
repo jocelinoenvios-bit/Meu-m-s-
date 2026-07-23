@@ -1,4 +1,4 @@
-const CACHE_NOME = "financas-v1";
+const CACHE_NOME = "financas-v2";
 const ARQUIVOS = ["./index.html", "./manifest.json"];
 
 self.addEventListener("install", (e)=>{
