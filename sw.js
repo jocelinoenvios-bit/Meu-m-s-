@@ -1,5 +1,5 @@
-const CACHE_NOME = "financas-v3";
-const ARQUIVOS = ["./index.html", "./manifest.json"];
+const CACHE_NOME = "financas-v4";
+const ARQUIVOS = ["./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (e)=>{
   self.skipWaiting();
