@@ -1,0 +1,12 @@
+{
+  "name": "Foco Quest",
+  "short_name": "Foco Quest",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#16122B",
+  "theme_color": "#16122B",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
