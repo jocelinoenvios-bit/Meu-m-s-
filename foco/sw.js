@@ -1,4 +1,4 @@
-const CACHE_NOME = "foco-quest-v1";
+const CACHE_NOME = "foco-quest-v2";
 const ARQUIVOS = ["./index.html", "./manifest.json", "./icon.svg"];
 
 self.addEventListener("install", (e)=>{

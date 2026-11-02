@@ -148,10 +148,16 @@
     <button class="btn peq" style="background:#2b1400;color:#fff" onclick="pedirNotificacao()">Ativar</button>
   </div>
   <h2 id="saudacao">Bom dia!</h2>
+  <div id="tipo-dia" class="muted" style="margin:-4px 0 12px;font-weight:800"></div>
+  <div id="entrega-box"></div>
   <div id="agora"></div>
   <div class="btns" style="margin:0 0 6px">
     <button class="btn r" onclick="organizarDia()">🪄 Organizar meu dia</button>
     <button class="btn" onclick="abrirTarefa()">➕ Nova missão</button>
+  </div>
+  <div class="btns" style="margin:0 0 6px">
+    <button class="btn" onclick="mostrarPlano(true)">📋 Ver plano do dia</button>
+    <button class="btn" onclick="abrirFechamento()">🌙 Fechar o dia</button>
   </div>
   <h2>🗓️ Linha do tempo de hoje</h2>
   <div id="timeline" class="tl"></div>
@@ -199,8 +205,31 @@
   </div>
 </section>
 
+<!-- ABA MELANCIA -->
+<section id="aba-melancia" class="hidden">
+  <h2>🍉 Roça de melancia</h2>
+  <div class="card" id="mel-resumo"></div>
+  <div class="card">
+    <div class="opt"><span>Data do plantio</span><input type="date" id="mel-plantio" style="width:auto" onchange="salvarMel()"></div>
+    <div class="opt"><span>Tempo de rega por dia (min)</span><input type="number" id="mel-rega" min="5" step="5" style="width:90px" onchange="salvarMel()"></div>
+    <div class="opt" style="border:0"><span>Horário da rega</span><input type="time" id="mel-hora" style="width:auto" onchange="salvarMel()"></div>
+    <p class="muted" id="mel-agua" style="margin-top:6px"></p>
+  </div>
+  <h2>📅 Próximos cuidados</h2>
+  <div id="mel-prox"></div>
+  <p class="muted" style="font-size:.78rem;margin:10px 0 0">Plano montado com base em publicações da Embrapa (Semiárido, Hortaliças e Cocais) e práticas comuns de manejo. Doses de adubo e lâmina de água dependem do seu solo: confirme com um técnico, a EMATER/IPA ou o fornecedor da semente Manchester.</p>
+</section>
+
 <!-- ABA PRÊMIOS -->
 <section id="aba-loja" class="hidden">
+  <h2>🔁 Minhas rotinas</h2>
+  <p class="muted" style="margin-bottom:10px">Aparecem sozinhas no dia certo. Você não precisa digitar nada.</p>
+  <div id="rotinas"></div>
+  <div class="btns" style="margin-top:4px">
+    <button class="btn" onclick="abrirRotina()">➕ Nova rotina</button>
+    <button class="btn r" onclick="exportarAgenda()">📅 Pôr na agenda do celular</button>
+  </div>
+  <p class="muted" style="font-size:.78rem;margin-top:8px">A agenda do celular avisa mesmo com o app fechado. Baixe o arquivo e abra com o app de Agenda/Calendário.</p>
   <h2>🎁 Loja de recompensas</h2>
   <p class="muted" style="margin-bottom:12px">Troque as moedas que você ganha por coisas que você gosta. Sem culpa: você mereceu.</p>
   <div id="premios"></div>
@@ -227,7 +256,8 @@
   <button data-aba="hoje" class="on" onclick="aba('hoje')"><i>🏠</i>Hoje</button>
   <button data-aba="ideias" onclick="aba('ideias')"><i>💡</i>Ideias</button>
   <button data-aba="foco" onclick="aba('foco')"><i>🎯</i>Foco</button>
-  <button data-aba="loja" onclick="aba('loja')"><i>🎁</i>Prêmios</button>
+  <button data-aba="melancia" onclick="aba('melancia')"><i>🍉</i>Roça</button>
+  <button data-aba="loja" onclick="aba('loja')"><i>🎁</i>Mais</button>
 </div></nav>
 
 <!-- MODAL NOVA MISSÃO -->
@@ -246,6 +276,36 @@
     <div class="btns">
       <button type="button" class="btn hidden" id="t-apagar" style="background:var(--vermelho);flex:none;min-width:0" onclick="apagarTarefa()">🗑️</button>
       <button type="button" class="btn" onclick="fecharModal()">Cancelar</button>
+      <button class="btn p">Salvar</button>
+    </div>
+  </form>
+</div>
+
+<!-- MODAL PLANO / FECHAMENTO / MERCADORIA -->
+<div class="fundo" id="modal2" onclick="if(event.target===this)fechar2()">
+  <div class="modal" id="modal2-corpo"></div>
+</div>
+
+<!-- MODAL ROTINA -->
+<div class="fundo" id="modal-rot" onclick="if(event.target===this)this.classList.remove('on')">
+  <form class="modal" onsubmit="salvarRotina(event)">
+    <h3 id="rot-tit">Rotina</h3>
+    <div class="campo"><span>Nome</span><input id="r-titulo" required autocomplete="off"></div>
+    <div class="linha2">
+      <div class="campo"><span>Horário</span><input id="r-hora" type="time" required></div>
+      <div class="campo"><span>Duração (min)</span><input id="r-dur" type="number" min="5" step="5" required></div>
+    </div>
+    <div class="campo"><span>Dias da semana</span><div class="chips" id="r-dias"></div></div>
+    <div class="campo"><div class="chips">
+      <button type="button" id="r-feriado" onclick="this.classList.toggle('on')">🎉 Também nos feriados</button>
+      <button type="button" id="r-sement" onclick="this.classList.toggle('on')">🚚 Pular em dia de entrega</button>
+      <button type="button" id="r-main" onclick="this.classList.toggle('on')">⭐ Importante</button>
+      <button type="button" id="r-flex" onclick="this.classList.toggle('on')">🔀 Horário flexível (cede lugar à roça)</button>
+    </div></div>
+    <div class="campo"><span>Passos (um por linha)</span><textarea id="r-passos" rows="3"></textarea></div>
+    <div class="btns">
+      <button type="button" class="btn hidden" id="r-apagar" style="background:var(--vermelho);flex:none;min-width:0" onclick="apagarRotina()">🗑️</button>
+      <button type="button" class="btn" onclick="document.getElementById('modal-rot').classList.remove('on')">Cancelar</button>
       <button class="btn p">Salvar</button>
     </div>
   </form>
@@ -273,7 +333,10 @@ function carregar(){
       {id:uid(),nome:"Um episódio da minha série",custo:50},
       {id:uid(),nome:"Tarde livre pra um projeto que eu amo",custo:150}
     ],
-    cfg:{som:1,antes:5,checkin:0}, ultimoCheckin:Date.now(), ultimoDia:null
+    cfg:{som:1,antes:5,checkin:0}, ultimoCheckin:Date.now(), ultimoDia:null,
+    rotinas: rotinasPadrao(), entrega:null,
+    melancia:{plantio:"2026-11-08", covas:983, rega:60, hora:"05:15"},
+    emitidos:{}, gerado:{}, planoVisto:null, fechado:null
   }, s || {});
 }
 function salvar(){ try{ localStorage.setItem(CHAVE, JSON.stringify(S)); }catch(e){} }
@@ -292,6 +355,7 @@ function durTxt(m){ return m<60 ? m+" min" : (Math.floor(m/60)+"h"+(m%60?String(
 function virarDia(){
   const hoje = diaStr(); if(S.ultimoDia === hoje) return;
   let n = 0;
+  S.tarefas = S.tarefas.filter(t => t.feita || t.dia >= hoje || !t.origem || (t.origem==="melancia" && !t.diaria));
   S.tarefas.forEach(t => { if(!t.feita && t.dia < hoje){ t.dia = hoje; t.hora = ""; t.notif = {}; t.veio = true; n++; } });
   S.tarefas = S.tarefas.filter(t => !(t.feita && t.dia < diaStr(new Date(Date.now()-14*864e5))));
   S.ultimoDia = hoje; salvar();
@@ -312,7 +376,7 @@ function ganhar(xp, el){
 
 // ---------- Render ----------
 function render(){
-  renderTopo(); renderHoje(); renderIdeias(); renderFoco(); renderLoja();
+  renderTopo(); renderHoje(); renderIdeias(); renderFoco(); renderLoja(); renderMelancia(); renderRotinas();
 }
 function renderTopo(){
   const n = nivelDe(S.xp), base = n>1?xpDoNivel(n-1):0, alvo = xpDoNivel(n);
@@ -345,6 +409,7 @@ function missaoAgora(){
 }
 
 function renderHoje(){
+  renderEntregaBox();
   const h = new Date().getHours();
   document.getElementById("saudacao").textContent = (h<12?"☀️ Bom dia!":h<18?"🌤️ Boa tarde!":"🌙 Boa noite!") + " Foque em uma coisa por vez.";
   document.getElementById("aviso-notif").classList.toggle("hidden", !("Notification" in window) || Notification.permission !== "default");
@@ -393,7 +458,7 @@ function itemHTML(t, cls, hora){
       <button class="check" onclick="concluir('${t.id}',this)" aria-label="Concluir">${t.feita?"✓":""}</button>
       <div class="info" onclick="abrirTarefa('${t.id}')">
         <div class="tit">${t.main?'<span class="estrela">⭐</span> ':''}${esc(t.titulo)}</div>
-        <div class="meta">⏱️ ${durTxt(t.dur)}${t.hora?" · até "+min2hm(hm2min(t.hora)+t.dur):""}${np?` · 🪜 ${ok}/${np}`:""} · +${xpTarefa(t)} XP${t.veio?" · 🌅 de antes":""}${t.feita&&t.real?` · levou ${t.real} min`:""}</div>
+        <div class="meta">⏱️ ${durTxt(t.dur)}${t.hora?" · até "+min2hm(hm2min(t.hora)+t.dur):""}${np?` · 🪜 ${ok}/${np}`:""} · +${xpTarefa(t)} XP${t.veio||t.atraso?" · 🌅 de antes":""}${t.origem==="rotina"?" · 🔁":""}${t.feita&&t.real?` · levou ${t.real} min`:""}</div>
       </div>
       ${t.feita?"":`<button class="btn peq" onclick="comecar('${t.id}')" aria-label="Começar">▶️</button>`}
     </div></div>`;
@@ -438,7 +503,7 @@ document.getElementById("dicas").innerHTML = DICAS.map(d=>`<div class="dica"><b>
 
 // ---------- Abas ----------
 function aba(nome){
-  ["hoje","ideias","foco","loja"].forEach(a=>document.getElementById("aba-"+a).classList.toggle("hidden",a!==nome));
+  ["hoje","ideias","foco","melancia","loja"].forEach(a=>document.getElementById("aba-"+a).classList.toggle("hidden",a!==nome));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.aba===nome));
   document.getElementById("fab").classList.toggle("hidden", nome!=="hoje");
   window.scrollTo(0,0); render();
@@ -513,14 +578,7 @@ function organizarDia(){
   const ts = tarefasHoje().filter(t=>!t.feita);
   const soltas = ts.filter(t=>!t.hora).sort((a,b)=>(b.main|0)-(a.main|0) || a.criada-b.criada);
   if(!soltas.length){ toast("Tudo já tem horário! 👌"); return; }
-  const ocup = ts.filter(t=>t.hora).map(t=>[hm2min(t.hora), hm2min(t.hora)+t.dur]);
-  let cursor = Math.ceil((minAgora()+5)/5)*5, sobra = 0, PAUSA = 5, FIM = 23*60+30;
-  soltas.forEach(t=>{
-    let ini = cursor, mexeu = true;
-    while(mexeu){ mexeu=false; for(const [a,b] of ocup){ if(ini < b+PAUSA && ini+t.dur+PAUSA > a){ ini = b+PAUSA; mexeu=true; } } }
-    if(ini + t.dur > FIM){ sobra++; return; }
-    t.hora = min2hm(ini); t.notif = {}; ocup.push([ini, ini+t.dur]); cursor = ini + t.dur + PAUSA;
-  });
+  const sobra = encaixar(soltas, Math.ceil((minAgora()+5)/5)*5);
   salvar(); render(); som("ganho");
   toast(sobra ? `🪄 Organizado! ${sobra} não couberam hoje — que tal deixar pra amanhã?` : "🪄 Dia organizado! Siga a linha do tempo.");
 }
@@ -649,7 +707,7 @@ async function notificar(titulo, corpo){
   try{ new Notification(titulo, op); }catch(e){}
 }
 function verificarLembretes(){
-  virarDia();
+  if(S.ultimoDia !== diaStr()){ virarDia(); gerarDia(); render(); mostrarPlano(); }
   const agora = minAgora(), antes = S.cfg.antes;
   tarefasHoje().forEach(t=>{
     if(t.feita || !t.hora) return; t.notif = t.notif || {};
@@ -694,9 +752,352 @@ function confete(el){
 let toastT;
 function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("on"),3200); }
 
+// ---------- Rotinas fixas ----------
+const SEMANA = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+function rotinasPadrao(){
+  const r = (titulo,hora,dur,dias,extra) => Object.assign({id:uid(),titulo,hora,dur,dias,dif:"facil",passos:[],ativa:true,feriado:false,semEntrega:false,main:false}, extra||{});
+  return [
+    r("☀️ Acordar às 5h + beber água","05:00",10,[0,1,2,3,4,5,6],{passos:["Levantar sem olhar o celular","Beber um copo d'água","Abrir o Foco Quest e ver o plano"]}),
+    r("🐶 Passear com o cachorro","06:30",30,[0,6],{feriado:true}),
+    r("💻 App da academia (Claude Code)","07:30",300,[0,6],{dif:"dificil",main:true,flex:true,passos:["Ler onde parei da última vez","Escolher 1 objetivo para hoje","Trabalhar no objetivo","Testar o que fiz","Anotar onde parei e o próximo passo"]}),
+    r("🍉 Ronda geral na melancia","08:00",45,[1,2,3,4,5],{semEntrega:true,flex:true,dif:"media",passos:["Andar pelas carreiras","Ver plantas murchas ou gotejador entupido","Anotar o que precisa de atenção"]}),
+    r("🥋 Levar as crianças ao jiu-jitsu (18h–19h)","17:40",80,[1,5],{main:true,passos:["Sair às 17:40","Ficar com a esposa assistindo","Voltar às 19h"]}),
+    r("🥋 Levar as crianças ao jiu-jitsu (18h–19h30)","17:40",110,[3],{main:true,passos:["Sair às 17:40","Ficar com a esposa assistindo","Voltar às 19h30"]}),
+    r("🌙 Fechar o dia no app","21:30",5,[0,1,2,3,4,5,6],{passos:["Ver o que fiz hoje","Passar o que faltou pra amanhã"]}),
+    r("📵 Desligar telas e preparar pra dormir","21:45",15,[0,1,2,3,4,5,6],{passos:["Celular carregando longe da cama","Dormir às 22h para acordar às 5h"]})
+  ];
+}
+function dowDe(dia){ const [a,m,d]=dia.split("-").map(Number); return new Date(a,m-1,d).getDay(); }
+function somaDias(dia,n){ const [a,m,d]=dia.split("-").map(Number); return diaStr(new Date(a,m-1,d+n)); }
+function diasEntre(a,b){ const [y1,m1,d1]=a.split("-").map(Number), [y2,m2,d2]=b.split("-").map(Number); return Math.round((Date.UTC(y2,m2-1,d2)-Date.UTC(y1,m1-1,d1))/864e5); }
+function ehFeriado(dia){
+  const ano = +dia.slice(0,4), md = dia.slice(5);
+  if(["01-01","04-21","05-01","09-07","10-12","11-02","11-15","11-20","12-25"].includes(md)) return true;
+  // Páscoa (algoritmo de Meeus) → Carnaval, Sexta-feira Santa, Corpus Christi
+  const a=ano%19,b=Math.floor(ano/100),c=ano%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
+    h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),
+    mes=Math.floor((h+l-7*m+114)/31),dd=((h+l-7*m+114)%31)+1, pascoa=diaStr(new Date(ano,mes-1,dd));
+  return [-48,-47,-2,60].some(n=>somaDias(pascoa,n)===dia);
+}
+function mk(o){ return Object.assign({id:uid(), feita:false, notif:{}, criada:Date.now(), dia:diaStr(), hora:"", dur:30, dif:"media", passos:[], main:false}, o, {passos:(o.passos||[]).map(t=>typeof t==="string"?{t,ok:false}:t)}); }
+
+// Encaixa tarefas sem horário nos espaços livres de hoje, com pausas de 5 min.
+function encaixar(lista, inicio){
+  const ids = new Set(lista.map(t=>t.id));
+  const ocup = tarefasHoje().filter(t=>t.hora && !t.feita && !ids.has(t.id)).map(t=>[hm2min(t.hora), hm2min(t.hora)+t.dur]);
+  let cursor = inicio, sobra = 0; const PAUSA = 5, FIM = 23*60+30;
+  lista.forEach(t=>{
+    let ini = cursor, mexeu = true;
+    while(mexeu){ mexeu=false; for(const [a,b] of ocup){ if(ini < b+PAUSA && ini+t.dur+PAUSA > a){ ini = b+PAUSA; mexeu=true; } } }
+    if(ini + t.dur > FIM){ sobra++; return; }
+    t.hora = min2hm(ini); t.notif = {}; ocup.push([ini, ini+t.dur]); cursor = ini + t.dur + PAUSA;
+  });
+  return sobra;
+}
+
+// ---------- Entregas ----------
+function diaEntrega(dia){
+  const e = S.entrega; if(!e) return 0;
+  const n = diasEntre(e.inicio, dia) + 1;
+  return n>=1 && n<=e.dias ? n : 0;
+}
+function tarefasEntrega(dia, n, inicioMin){
+  const tot = S.entrega.dias, jiu = [1,3,5].includes(dowDe(dia)), l = [];
+  if(inicioMin == null) l.push(mk({dia, origem:"entrega", titulo:"🗺️ Montar a rota com as notas", hora:"06:15", dur:30, dif:"media", passos:["Separar as notas do dia","Agrupar por bairro/região","Definir a ordem das entregas"]}));
+  const ini = inicioMin == null ? 7*60 : inicioMin;
+  l.push(mk({dia, origem:"entrega", titulo:`🚚 Entregas (dia ${n} de ${tot})`, hora:min2hm(ini), dur:Math.max(60, 17*60-ini), dif:"dificil", main:true,
+    passos:["Conferir a carga","Seguir a rota","Anotar entregas e pagamentos", jiu?"Voltar até 17h (jiu-jitsu às 17:40)":"Voltar pra casa"]}));
+  if(jiu) l.push(mk({dia, origem:"entrega", titulo:"⚠️ Hora de voltar: jiu-jitsu das crianças às 17:40", hora:"16:30", dur:10, dif:"facil", main:true}));
+  return l;
+}
+function abrirMercadoria(){
+  const e = S.entrega, n = diaEntrega(diaStr());
+  abrir2(`<h3>📦 Mercadoria chegou!</h3>
+    <p class="muted" style="margin-bottom:12px">Eu monto os dias de entrega e passo os cuidados pesados da melancia para depois.</p>
+    <div class="campo"><span>Quantos dias de entrega?</span><div class="chips" id="m-dias">${[1,2,3,4].map(d=>`<button type="button" class="${d===3?"on":""}" onclick="this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));this.classList.add('on')">${d} dia${d>1?"s":""}</button>`).join("")}</div></div>
+    <div class="btns">
+      <button class="btn a" onclick="mercadoriaChegou('manha')">☀️ Chegou de manhã<br><small>começo a entregar hoje</small></button>
+      <button class="btn r" onclick="mercadoriaChegou('tarde')">🌇 Chegou à tarde<br><small>carrego hoje, saio amanhã 7h</small></button>
+    </div>
+    ${n?`<div class="btns"><button class="btn" style="background:var(--vermelho)" onclick="encerrarEntregas()">Encerrar período de entregas</button></div>`:""}
+    <div class="btns"><button class="btn" onclick="fechar2()">Cancelar</button></div>`);
+}
+function mercadoriaChegou(periodo){
+  const sel = document.querySelector("#m-dias .on"), dias = sel ? parseInt(sel.textContent) : 3, hoje = diaStr();
+  S.entrega = {inicio: periodo==="manha" ? hoje : amanhaStr(), dias};
+  // tira do dia de hoje o que é pesado da melancia (volta a aparecer no próximo dia livre)
+  S.tarefas = S.tarefas.filter(t => !(t.dia===hoje && !t.feita && ((t.origem==="melancia" && t.pesada) || t.semEntrega)) || (delete S.emitidos[t.chave], false));
+  const agora = Math.ceil((minAgora()+5)/5)*5, novas = [];
+  novas.push(mk({origem:"entrega", titulo:"📦 Carregar o carro", hora:min2hm(agora), dur:60, dif:"dificil", passos:["Conferir mercadoria com as notas","Organizar por ordem de entrega","Carregar"]}));
+  if(periodo==="manha"){
+    novas.push(mk({origem:"entrega", titulo:"🗺️ Montar a rota com as notas", hora:min2hm(agora+65), dur:30, dif:"media", passos:["Separar as notas","Agrupar por bairro/região","Definir a ordem"]}));
+    novas.push(...tarefasEntrega(hoje, 1, agora+100));
+  }
+  S.tarefas.push(...novas); salvar(); fechar2(); render(); som("ganho");
+  toast(periodo==="manha" ? `🚚 Bora! ${dias} dia(s) de entrega a partir de hoje.` : `🚚 Carregue hoje. Entregas a partir de amanhã às 7h (${dias} dia(s)).`);
+}
+function encerrarEntregas(){
+  const hoje = diaStr(); S.entrega = null;
+  S.tarefas = S.tarefas.filter(t => !(t.dia===hoje && !t.feita && t.origem==="entrega"));
+  salvar(); fechar2(); render(); toast("✅ Entregas encerradas. Amanhã é dia de melancia!");
+}
+
+// ---------- Plano da melancia (Manchester, ~90 dias) ----------
+function planoMelancia(){
+  const P = [], add = (dap,titulo,dur,dif,passos,extra) => P.push(Object.assign({dap,titulo,dur,dif,passos:passos||[],pesada:dur>40},extra||{}));
+  add(-2,"🔧 Testar o gotejamento nas 24 carreiras",90,"media",["Ligar o sistema todo","Andar cada carreira procurando vazamento e gotejador entupido","Conferir se o fim da linha também pinga","Consertar o que achar"]);
+  add(-1,"💧 Molhar bem as covas antes do plantio",60,"facil",["Ligar o gotejamento","Conferir se a terra das covas ficou úmida"]);
+  add(-1,"🧰 Separar sementes/mudas, ferramentas e adubo de plantio",45,"facil",[],{pesada:false,hora:"19:30"});
+  add(0,"🌱 PLANTIO — 983 covas (24 carreiras × 40)",360,"dificil",["Carreiras 1 a 6","Carreiras 7 a 12","Carreiras 13 a 18","Carreiras 19 a 24","Ligar a irrigação depois de plantar"],{main:true});
+  add(5,"🔢 Contar falhas (covas sem planta) por carreira",60,"media",["Anotar quantas falhas em cada carreira"]);
+  add(8,"🌱 Replantio das falhas",90,"media",["Replantar as covas anotadas","Regar as replantadas"]);
+  for(let d=7; d<=84; d+= (d%7===0?4:3)) add(d,"🔍 Monitorar pragas e doenças",45,"media",["Olhar 10 plantas em carreiras alternadas","Embaixo das folhas: mosca-branca, pulgão, tripes","Riscos nas folhas (minadora), furos e lagartas (broca)","Pó branco (oídio), manchas ou plantas murchas","Anotar e falar com o técnico se estiver aumentando"],{grupo:"monitor"});
+  [15,30,45].forEach((d,i)=>add(d,`🌿 Capina — tirar o mato das carreiras (${i+1}ª)`,240,"dificil",["Carreiras 1 a 8","Carreiras 9 a 16","Carreiras 17 a 24"]));
+  [20,28,36].forEach(d=>add(d,"🌿 Pentear as ramas (direcionar para dentro da faixa)",120,"media",["Virar as ramas para o mesmo lado","Liberar o caminho entre as carreiras"]));
+  add(24,"🐝 Preparar a polinização (abelhas/colmeias)",60,"media",["Ver se há abelhas visitando as flores (6h–10h)","Se tiver poucas, conseguir colmeias perto da roça","Não aplicar inseticida de manhã durante a floração"]);
+  add(30,"🌼 Conferir flores femininas e visita das abelhas",30,"facil",["Olhar entre 6h e 10h, horário de mais visitas"]);
+  add(38,"🎀 Marcar os frutos pegos com fita (anotar a data)",90,"media",["A colheita fica perto de 40–45 dias depois da flor abrir","Usar uma cor de fita por semana"]);
+  add(42,"✂️ Desbaste: deixar os 1–2 melhores frutos por planta",240,"dificil",["Tirar frutos deformados, pequenos ou com defeito","Deixar os mais bem formados"],{main:true});
+  add(48,"✂️ Repasse do desbaste",120,"media",["Tirar frutos novos que nasceram depois","Tirar deformados"]);
+  add(50,"🌾 Colocar palha/capim seco embaixo dos frutos",240,"dificil",["Protege a casca do contato com a terra úmida"]);
+  [58,66,74].forEach(d=>add(d,"🔄 Virar os frutos (¼ de volta)",150,"media",["Virar com cuidado, sem torcer o talo","Ajuda a colorir por igual e evita mancha"]));
+  add(55,"📞 Procurar compradores e pesquisar o preço",60,"media",["Feiras, mercados, sacolões, atravessadores","Perguntar preço por kg e por unidade"],{pesada:false,hora:"19:30",main:true});
+  add(68,"🤝 Fechar comprador, preço e data da colheita",60,"media",[],{pesada:false,hora:"19:30",main:true});
+  add(74,"🚛 Combinar frete, caixas e balança",60,"media",[],{pesada:false,hora:"19:30"});
+  add(76,"🔪 Amostragem: ver se os frutos estão no ponto",60,"media",["Gavinha do mesmo nó do fruto seca","Mancha do lado do chão amarelada","Som oco ao bater","Abrir 3–5 frutos e conferir a polpa"]);
+  add(82,"💧 Reduzir a irrigação para a colheita (confirmar com técnico)",15,"facil",[],{pesada:false});
+  [85,87,89].forEach((d,i)=>add(d,`🍉 COLHEITA (${i+1}ª passada)`,300,"dificil",["Colher cedo, antes do sol forte","Cortar deixando um pedaço do talo","Não jogar nem bater os frutos","Separar por peso: 7 kg ou mais rendem melhor preço","Deixar na sombra até carregar"],{main:true}));
+  add(92,"📊 Fechar as contas da safra e anotar aprendizados",60,"media",["Somar gastos","Somar vendas","Anotar o que fazer melhor na próxima"],{pesada:false,hora:"19:30"});
+  return P;
+}
+function faseMelancia(dap){
+  if(dap<0) return "Preparação para o plantio";
+  if(dap<=20) return "Fase inicial (pegamento e crescimento)";
+  if(dap<=35) return "Crescimento das ramas e início da floração";
+  if(dap<=50) return "Floração e pegamento dos frutos";
+  if(dap<=80) return "Enchimento dos frutos";
+  if(dap<=92) return "Maturação e colheita";
+  return "Safra encerrada";
+}
+function tarefasMelancia(dia, entrega){
+  const M = S.melancia; if(!M || !M.plantio) return [];
+  const dap = diasEntre(M.plantio, dia); if(dap < -3 || dap > 95) return [];
+  const l = [], hora = M.hora || "05:15";
+  if(dap >= -1 && dap <= 89){
+    l.push(mk({dia, origem:"melancia", diaria:true, titulo:"💧 Ligar o gotejamento", hora, dur:10, dif:"facil", passos:["Ligar a bomba","Conferir 3 carreiras: está pingando em todas as covas?"]}));
+    l.push(mk({dia, origem:"melancia", diaria:true, titulo:"💧 Desligar o gotejamento", hora:min2hm(hm2min(hora)+(+M.rega||60)), dur:5, dif:"facil"}));
+  }
+  if(dap >= 7 && dap <= 80 && [1,3,5].includes(dowDe(dia))){
+    const foco = dap<=30 ? "fase de crescimento: mais nitrogênio e fósforo" : dap<=55 ? "floração/pegamento: equilibrar nitrogênio, potássio e cálcio" : "enchimento dos frutos: mais potássio";
+    l.push(mk({dia, origem:"melancia", diaria:true, titulo:"🧪 Fertirrigação (adubo pela água)", hora:min2hm(hm2min(hora)+15), dur:30, dif:"media",
+      passos:[`Agora é ${foco}`,"Usar a dose da recomendação do técnico/análise de solo","Parar ~7 dias antes da colheita"]}));
+  }
+  // tarefas pontuais: em dia de entrega, as pesadas esperam o próximo dia livre
+  const prontas = planoMelancia().map((p,i)=>Object.assign({chave:"mel-"+i},p)).filter(p => p.dap<=dap && !S.emitidos[p.chave]);
+  const ultimoGrupo = {};
+  prontas.forEach(p=>{ if(p.grupo) ultimoGrupo[p.grupo] = p.chave; });
+  prontas.forEach(p=>{
+    if(p.dap < dap-10 || (p.grupo && ultimoGrupo[p.grupo]!==p.chave)){ S.emitidos[p.chave]=1; return; }
+    if(entrega && p.pesada) return;
+    S.emitidos[p.chave]=1;
+    l.push(mk({dia, origem:"melancia", chave:p.chave, pesada:p.pesada, titulo:p.titulo, dur:p.dur, dif:p.dif, passos:p.passos, main:!!p.main, hora:p.hora||"", atraso:p.dap<dap}));
+  });
+  return l;
+}
+
+// ---------- Gera o dia sozinho ----------
+function gerarDia(){
+  const hoje = diaStr(); if(S.gerado[hoje]) return;
+  const dow = dowDe(hoje), fer = ehFeriado(hoje), n = diaEntrega(hoje), novas = [], flex = [];
+  S.rotinas.forEach(r=>{
+    if(!r.ativa || !(r.dias.includes(dow) || (r.feriado && fer)) || (r.semEntrega && n)) return;
+    const t = mk({origem:"rotina", rotina:r.id, titulo:r.titulo, hora:r.hora, dur:r.dur, dif:r.dif, passos:r.passos.slice(), main:r.main, semEntrega:r.semEntrega});
+    if(r.flex) flex.push(t);
+    novas.push(t);
+  });
+  if(n) novas.push(...tarefasEntrega(hoje, n));
+  if(S.entrega && diasEntre(S.entrega.inicio, hoje) >= S.entrega.dias) S.entrega = null;
+  novas.push(...tarefasMelancia(hoje, !!n));
+  S.tarefas.push(...novas);
+  let soltas = novas.filter(t=>!t.hora).concat(S.tarefas.filter(t=>t.dia===hoje && t.veio && !t.hora && t.origem==="melancia"));
+  // Dia com trabalho pesado na roça: a roça vai para a manhã fresca e o que é flexível vem depois.
+  if(soltas.some(t=>t.pesada)){ soltas.sort((a,b)=>(b.main|0)-(a.main|0)); flex.forEach(t=>t.hora=""); soltas = soltas.concat(flex); }
+  const ini = Math.max(hm2min(S.melancia.hora||"05:15")+20, Math.ceil(minAgora()/5)*5);
+  if(soltas.length) encaixar(soltas, ini);
+  S.gerado[hoje] = 1;
+  Object.keys(S.gerado).forEach(k=>{ if(k < somaDias(hoje,-30)) delete S.gerado[k]; });
+  salvar();
+}
+function tipoDia(){
+  const hoje = diaStr(), n = diaEntrega(hoje), dow = dowDe(hoje), M = S.melancia, dap = M && M.plantio ? diasEntre(M.plantio, hoje) : null;
+  const partes = [];
+  if(n) partes.push(`🚚 Dia de entrega ${n}/${S.entrega.dias}`);
+  else if(dow===0||dow===6) partes.push("🏖️ Fim de semana: cachorro + app da academia");
+  else partes.push("🍉 Dia de melancia");
+  if(ehFeriado(hoje)) partes.push("🎉 Feriado");
+  if(dap!=null && dap>=0 && dap<=92) partes.push(`🌱 Dia ${dap} da roça`);
+  else if(dap!=null && dap<0 && dap>=-7) partes.push(`🌱 Plantio em ${-dap} dia(s)`);
+  return partes.join(" · ");
+}
+function renderEntregaBox(){
+  const hoje = diaStr(), n = diaEntrega(hoje), dow = dowDe(hoje), el = document.getElementById("entrega-box");
+  const futura = S.entrega && S.entrega.inicio > hoje;
+  if(n || futura) el.innerHTML = `<div class="alerta" style="background:var(--azul);color:#04202e"><div>🚚 ${futura?"Entregas começam amanhã às 7h":`Período de entregas: dia ${n} de ${S.entrega.dias}`}</div><button class="btn peq" style="background:#04202e;color:#fff" onclick="abrirMercadoria()">Mudar</button></div>`;
+  else el.innerHTML = `<button class="btn ${[2,3].includes(dow)?"a":""}" style="width:100%;margin-bottom:12px" onclick="abrirMercadoria()">📦 A mercadoria chegou!</button>`;
+  document.getElementById("tipo-dia").textContent = tipoDia();
+}
+
+// ---------- Plano do dia e fechamento ----------
+function abrir2(html){ document.getElementById("modal2-corpo").innerHTML = html; document.getElementById("modal2").classList.add("on"); }
+function fechar2(){ document.getElementById("modal2").classList.remove("on"); }
+function mostrarPlano(forcar){
+  const hoje = diaStr(); if(!forcar && S.planoVisto === hoje) return;
+  const ts = tarefasHoje().filter(t=>!t.feita).sort((a,b)=>(hm2min(a.hora)??9999)-(hm2min(b.hora)??9999));
+  const primeira = missaoAgora();
+  abrir2(`<h3>📋 Seu plano de hoje</h3>
+    <p class="muted" style="margin-bottom:10px">${esc(tipoDia())}</p>
+    ${primeira?`<div class="card agora" style="margin-bottom:12px"><span class="tag">COMECE POR AQUI</span><h3 style="font-size:1.15rem">${esc(primeira.t.titulo)}</h3></div>`:""}
+    ${ts.length ? ts.map(t=>`<div class="opt"><b style="width:52px;flex:none">${t.hora||"—"}</b><span style="flex:1">${t.main?"⭐ ":""}${esc(t.titulo)}</span><span class="muted">${durTxt(t.dur)}</span></div>`).join("") : `<p class="muted">Dia livre! Que tal uma ideia da caixa?</p>`}
+    <div class="btns"><button class="btn p" onclick="planoOk(this)">🚀 Bora! ${S.planoVisto===hoje?"":"(+5 XP)"}</button></div>`);
+}
+function planoOk(el){
+  const hoje = diaStr();
+  if(S.planoVisto !== hoje){ S.planoVisto = hoje; ganhar(5, el); }
+  salvar(); fechar2(); render();
+}
+function abrirFechamento(){
+  const hoje = diaStr(), ts = tarefasHoje(), feitas = ts.filter(t=>t.feita), falta = ts.filter(t=>!t.feita && t.origem!=="rotina");
+  const am = somaDias(hoje,1), dap = S.melancia.plantio ? diasEntre(S.melancia.plantio, am) : null;
+  const amanhaMel = planoMelancia().filter(p=>p.dap===dap).map(p=>p.titulo);
+  abrir2(`<h3>🌙 Fechar o dia</h3>
+    <p style="font-weight:800;margin-bottom:10px">Você fez ${feitas.length} de ${ts.length} missões hoje. ${feitas.length?"Isso conta! 💜":"Amanhã é um novo dia. 💜"}</p>
+    ${falta.length?`<p class="muted" style="margin-bottom:6px">O que ficou pra trás:</p>`+falta.map(t=>`<div class="opt"><span style="flex:1">${esc(t.titulo)}</span>${t.origem==="melancia"?`<span class="muted" style="font-size:.8rem">vai pra amanhã</span>`:`<button class="btn peq" onclick="paraAmanha('${t.id}',this)">Amanhã</button>`}<button class="btn peq" onclick="soltar('${t.id}',this)">${t.origem==="melancia"?"Já fiz/largar":"Largar"}</button></div>`).join(""):""}
+    ${amanhaMel.length?`<p class="muted" style="margin:12px 0 4px">🍉 Amanhã na roça:</p>`+amanhaMel.map(t=>`<div>• ${esc(t)}</div>`).join(""):""}
+    <div class="campo" style="margin-top:14px"><span>Algo pra lembrar amanhã?</span><input id="f-lembrar" placeholder="Ex: comprar mangueira" autocomplete="off"></div>
+    <div class="btns"><button class="btn p" onclick="fecharDia(this)">✅ Dia fechado ${S.fechado===hoje?"":"(+10 XP)"}</button></div>`);
+}
+function paraAmanha(id, el){ const t=S.tarefas.find(x=>x.id===id); if(t){ t.dia=amanhaStr(); t.hora=""; t.notif={}; salvar(); } el.parentNode.remove(); }
+function soltar(id, el){ S.tarefas=S.tarefas.filter(x=>x.id!==id); salvar(); el.parentNode.remove(); }
+function fecharDia(el){
+  const hoje = diaStr(), txt = document.getElementById("f-lembrar").value.trim();
+  if(txt) S.tarefas.push(mk({dia:amanhaStr(), titulo:txt, dur:15, dif:"facil"}));
+  const r = tarefasHoje().find(t=>t.titulo.startsWith("🌙 Fechar o dia") && !t.feita);
+  if(r){ r.feita = true; r.feitaEm = Date.now(); }
+  if(S.fechado !== hoje){ S.fechado = hoje; ganhar(10, el); }
+  salvar(); fechar2(); render(); toast("🌙 Boa noite! Amanhã às 5h o plano já vai estar pronto.");
+}
+
+// ---------- Tela da melancia ----------
+function renderMelancia(){
+  const M = S.melancia, hoje = diaStr(), dap = M.plantio ? diasEntre(M.plantio, hoje) : null;
+  const pct = dap==null ? 0 : Math.max(0, Math.min(100, dap/90*100));
+  document.getElementById("mel-resumo").innerHTML = `
+    <div style="font-size:1.6rem;font-weight:900">${dap==null?"Defina a data do plantio":dap<0?`Plantio em ${-dap} dia(s)`:`Dia ${dap} de ~90`}</div>
+    <div class="muted" style="font-weight:800">${dap==null?"":faseMelancia(dap)}</div>
+    <div class="barra" style="height:14px;margin-top:10px"><i style="width:${pct}%;background:linear-gradient(90deg,#16a34a,#f43f5e)"></i></div>
+    <div class="muted" style="margin-top:8px">🍉 Manchester · ${M.covas} covas · 24 carreiras × 40 · 1 m entre covas · gotejamento 2 L/h</div>`;
+  document.getElementById("mel-plantio").value = M.plantio || "";
+  document.getElementById("mel-rega").value = M.rega;
+  document.getElementById("mel-hora").value = M.hora || "05:15";
+  const litros = Math.round(M.covas * 2 * (M.rega/60));
+  document.getElementById("mel-agua").textContent = `Com ${M.rega} min por dia: cerca de ${litros.toLocaleString("pt-BR")} litros (≈ ${(litros/1000).toLocaleString("pt-BR",{maximumFractionDigits:1})} mil L), considerando 1 gotejador por cova. A planta pede mais água na floração e no enchimento dos frutos; ajuste olhando a umidade do solo.`;
+  if(dap==null){ document.getElementById("mel-prox").innerHTML = ""; return; }
+  const prox = planoMelancia().filter(p=>p.dap>=dap && p.dap<=dap+14 && p.grupo!=="monitor").slice(0,10);
+  const mon = planoMelancia().find(p=>p.grupo==="monitor" && p.dap>=dap);
+  document.getElementById("mel-prox").innerHTML = (prox.map(p=>{
+    const d = somaDias(M.plantio, p.dap), [a,m,dd] = d.split("-");
+    return `<div class="premio"><b style="width:62px;flex:none;color:var(--amarelo)">${dd}/${m}<br><small class="muted">${SEMANA[dowDe(d)]}</small></b><div>${esc(p.titulo)}<div class="muted" style="font-weight:600;font-size:.8rem">${durTxt(p.dur)}${p.pesada?" · pesada (pula dia de entrega)":""}</div></div></div>`;
+  }).join("") || `<p class="muted">Nada pontual nas próximas 2 semanas, só rega e monitoramento.</p>`) +
+  (mon?`<p class="muted" style="margin-top:6px">🔍 Monitoramento de pragas a cada 3–4 dias · 🧪 Fertirrigação seg/qua/sex (dia 7 ao 80)</p>`:"");
+}
+function salvarMel(){
+  const M = S.melancia, antes = JSON.stringify(M);
+  M.plantio = document.getElementById("mel-plantio").value || M.plantio;
+  M.rega = Math.max(5, +document.getElementById("mel-rega").value || 60);
+  M.hora = document.getElementById("mel-hora").value || "05:15";
+  if(JSON.stringify(M) === antes) return;
+  // refaz as tarefas diárias da roça de hoje com os novos dados
+  const hoje = diaStr();
+  S.tarefas = S.tarefas.filter(t => !(t.dia===hoje && !t.feita && t.origem==="melancia" && t.diaria));
+  S.tarefas.push(...tarefasMelancia(hoje, !!diaEntrega(hoje)).filter(t=>t.diaria));
+  salvar(); render(); toast("🍉 Roça atualizada!");
+}
+
+// ---------- Editar rotinas ----------
+let rotEdit = null;
+function renderRotinas(){
+  document.getElementById("rotinas").innerHTML = S.rotinas.slice().sort((a,b)=>a.hora.localeCompare(b.hora)).map(r=>`<div class="premio" style="${r.ativa?"":"opacity:.45"}">
+    <b style="width:50px;flex:none;color:var(--amarelo)">${r.hora}</b>
+    <div onclick="abrirRotina('${r.id}')">${esc(r.titulo)}<div class="muted" style="font-weight:600;font-size:.8rem">${r.dias.length===7?"Todo dia":r.dias.map(d=>SEMANA[d]).join(", ")}${r.feriado?" + feriados":""} · ${durTxt(r.dur)}${r.semEntrega?" · não em dia de entrega":""}${r.flex?" · flexível":""}</div></div>
+    <button class="btn peq" onclick="toggleRotina('${r.id}')">${r.ativa?"Pausar":"Ativar"}</button></div>`).join("");
+}
+function toggleRotina(id){ const r=S.rotinas.find(x=>x.id===id); r.ativa=!r.ativa; salvar(); renderRotinas(); }
+function abrirRotina(id){
+  rotEdit = id || null; const r = id ? S.rotinas.find(x=>x.id===id) : {titulo:"",hora:"",dur:30,dias:[],feriado:false,semEntrega:false,main:false,passos:[]};
+  document.getElementById("rot-tit").textContent = id ? "Editar rotina" : "Nova rotina";
+  document.getElementById("r-titulo").value = r.titulo; document.getElementById("r-hora").value = r.hora; document.getElementById("r-dur").value = r.dur;
+  document.getElementById("r-passos").value = (r.passos||[]).join("\n");
+  document.getElementById("r-dias").innerHTML = SEMANA.map((s,i)=>`<button type="button" data-d="${i}" class="${r.dias.includes(i)?"on":""}" onclick="this.classList.toggle('on')">${s}</button>`).join("");
+  ["feriado","semEntrega","main","flex"].forEach(k=>document.getElementById(k==="semEntrega"?"r-sement":"r-"+k).classList.toggle("on", !!r[k]));
+  document.getElementById("r-apagar").classList.toggle("hidden", !id);
+  document.getElementById("modal-rot").classList.add("on");
+}
+function salvarRotina(e){
+  e.preventDefault();
+  const dias = [...document.querySelectorAll("#r-dias .on")].map(b=>+b.dataset.d);
+  if(!dias.length){ toast("Escolha pelo menos um dia"); return; }
+  const dados = {titulo:document.getElementById("r-titulo").value.trim(), hora:document.getElementById("r-hora").value, dur:Math.max(5,+document.getElementById("r-dur").value||30), dias,
+    feriado:document.getElementById("r-feriado").classList.contains("on"), semEntrega:document.getElementById("r-sement").classList.contains("on"),
+    main:document.getElementById("r-main").classList.contains("on"), flex:document.getElementById("r-flex").classList.contains("on"), passos:document.getElementById("r-passos").value.split("\n").map(s=>s.trim()).filter(Boolean)};
+  let r;
+  if(rotEdit){ r = S.rotinas.find(x=>x.id===rotEdit); Object.assign(r, dados); }
+  else { r = Object.assign({id:uid(), dif:"media", ativa:true}, dados); S.rotinas.push(r); }
+  aplicarRotinaHoje(r);
+  salvar(); document.getElementById("modal-rot").classList.remove("on"); render(); toast("🔁 Rotina salva!");
+}
+function aplicarRotinaHoje(r){
+  const hoje = diaStr();
+  S.tarefas = S.tarefas.filter(t => !(t.dia===hoje && t.rotina===r.id && !t.feita));
+  const jaFeita = S.tarefas.some(t => t.dia===hoje && t.rotina===r.id);
+  if(r && r.ativa && !jaFeita && (r.dias.includes(dowDe(hoje)) || (r.feriado && ehFeriado(hoje))) && !(r.semEntrega && diaEntrega(hoje)))
+    S.tarefas.push(mk({origem:"rotina", rotina:r.id, titulo:r.titulo, hora:r.hora, dur:r.dur, dif:r.dif, passos:r.passos.slice(), main:r.main, semEntrega:r.semEntrega}));
+}
+function apagarRotina(){
+  if(!confirm("Apagar esta rotina?")) return;
+  S.rotinas = S.rotinas.filter(x=>x.id!==rotEdit);
+  S.tarefas = S.tarefas.filter(t => !(t.dia===diaStr() && t.rotina===rotEdit && !t.feita));
+  salvar(); document.getElementById("modal-rot").classList.remove("on"); render();
+}
+
+// ---------- Exportar para a agenda do celular (.ics) ----------
+function exportarAgenda(){
+  const L = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Foco Quest//PT-BR","CALSCALE:GREGORIAN","X-WR-CALNAME:Foco Quest"];
+  const dt = (dia,hm) => dia.replace(/-/g,"") + "T" + hm.replace(":","") + "00";
+  const fim = (dia,hm,dur) => { const m = hm2min(hm)+dur; return m>=1440 ? dt(somaDias(dia,1), min2hm(m-1440)) : dt(dia, min2hm(m)); };
+  const limpa = s => s.replace(/[,;\\]/g, c=>"\\"+c);
+  const ev = (id,dia,hm,dur,titulo,rrule,desc) => { L.push("BEGIN:VEVENT","UID:"+id+"@focoquest","DTSTAMP:"+dt(diaStr(),"00:00")+"Z","DTSTART:"+dt(dia,hm),"DTEND:"+fim(dia,hm,dur),"SUMMARY:"+limpa(titulo));
+    if(rrule) L.push("RRULE:"+rrule); if(desc) L.push("DESCRIPTION:"+limpa(desc));
+    L.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+limpa(titulo),"TRIGGER:-PT"+(S.cfg.antes||0)+"M","END:VALARM","END:VEVENT"); };
+  const BY = ["SU","MO","TU","WE","TH","FR","SA"], hoje = diaStr();
+  S.rotinas.filter(r=>r.ativa).forEach(r=>{
+    let d = hoje; while(!r.dias.includes(dowDe(d))) d = somaDias(d,1);
+    ev("rot-"+r.id, d, r.hora, r.dur, r.titulo, "FREQ=WEEKLY;BYDAY="+r.dias.map(i=>BY[i]).join(","), (r.passos||[]).join(" / "));
+  });
+  const M = S.melancia;
+  if(M.plantio){
+    const h = M.hora||"05:15", ini = somaDias(M.plantio,-1) > hoje ? somaDias(M.plantio,-1) : hoje, n = 90 - diasEntre(M.plantio, ini) + 1;
+    if(n>0) ev("mel-rega", ini, h, +M.rega||60, "💧 Rega da melancia (ligar e depois desligar)", "FREQ=DAILY;COUNT="+n);
+    planoMelancia().forEach((p,i)=>{ const d = somaDias(M.plantio, p.dap); if(d >= hoje) ev("mel-"+i, d, p.hora || min2hm(hm2min(h)+20), p.dur, p.titulo, null, p.passos.join(" / ")); });
+  }
+  L.push("END:VCALENDAR");
+  const blob = new Blob([L.join("\r\n")], {type:"text/calendar"}), a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "foco-quest.ics"; document.body.appendChild(a); a.click(); a.remove();
+  toast("📅 Arquivo baixado! Abra com o app de Agenda.");
+}
+
 // ---------- Início ----------
-virarDia(); render();
-if(S.foco) aba("foco");
+virarDia(); gerarDia(); render();
+if(S.foco) aba("foco"); else setTimeout(()=>{ if(new Date().getHours()>=21 && S.fechado!==diaStr()) abrirFechamento(); else mostrarPlano(); }, 400);
 setInterval(()=>{ if(S.foco && !document.getElementById("aba-foco").classList.contains("hidden")) tickFoco(); else if(S.foco) { const r=restante(); if(r<=0 && !S.foco.avisou) tickFoco(); } }, 500);
 setInterval(verificarLembretes, 15000); setTimeout(verificarLembretes, 1500);
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden){ verificarLembretes(); render(); } });
